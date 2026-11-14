@@ -1,0 +1,14 @@
+# Local dependencies and secrets
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system files
+.DS_Store
+*.log
+
+# Source datasets are not required to run the web app
+*.nc
+ai4mars-labels-unmerged/
+data/
