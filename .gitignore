@@ -12,3 +12,6 @@ node_modules/
 *.nc
 ai4mars-labels-unmerged/
 data/
+!data/
+data/*
+!data/solar-sample-mongolia-2021-02-13.json
