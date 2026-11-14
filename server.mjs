@@ -22,6 +22,7 @@ let aircraftCache = {
 };
 let tokenCache = { token: null, expires: 0 };
 let aircraftRefreshPromise = null;
+let solarSamplePromise = null;
 
 const mime = {
   '.html': 'text/html; charset=utf-8',
@@ -161,6 +162,48 @@ function filterEntities(entities, params) {
   }).slice(0, limit);
 }
 
+async function loadSolarSample() {
+  if (!solarSamplePromise) {
+    solarSamplePromise = readFile(resolve(root, 'data/solar-sample-mongolia-2021-02-13.json'), 'utf8')
+      .then(text => {
+        const sample = JSON.parse(text);
+        const timestamp = `${sample.date}T${String(sample.hourUtc).padStart(2, '0')}:00:00Z`;
+        sample.records = sample.records.map(([latitude, longitude, toaInsolationWm2, surfaceShortwaveDownWm2]) => ({
+          timestamp,
+          latitude,
+          longitude,
+          altitudeKm: 0,
+          toaInsolationWm2,
+          surfaceShortwaveDownWm2
+        }));
+        return sample;
+      });
+  }
+  return solarSamplePromise;
+}
+
+function filterSolarRecords(records, params) {
+  const hour = params.get('hour');
+  const parsedHour = hour === null ? null : Number(hour);
+  const hasBounds = ['south', 'north', 'west', 'east'].every(key => params.has(key));
+  const bounds = hasBounds ? ['south', 'north', 'west', 'east'].map(key => Number(params.get(key))) : null;
+  const limit = Math.max(1, Math.min(10_000, Number(params.get('limit') || 10_000)));
+  return records.filter(record => {
+    if (parsedHour !== null) {
+      if (!Number.isInteger(parsedHour) || parsedHour < 0 || parsedHour > 23) return false;
+      if (Number(record.timestamp.slice(11, 13)) !== parsedHour) return false;
+    }
+    if (bounds && bounds.every(Number.isFinite)) {
+      const [south, north, west, east] = bounds;
+      const inLongitude = west <= east
+        ? record.longitude >= west && record.longitude <= east
+        : record.longitude >= west || record.longitude <= east;
+      if (record.latitude < south || record.latitude > north || !inLongitude) return false;
+    }
+    return true;
+  }).slice(0, limit);
+}
+
 async function serveStatic(pathname, res) {
   let relative;
   try {
@@ -204,11 +247,39 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { layers: [
         { id: 'surface', label: 'Surface', altitudeUnit: 'km', source: 'Three.js globe' },
         { id: 'air', label: 'Aircraft', altitudeUnit: 'km', source: 'OpenSky Network', live: true },
+        { id: 'solar', label: 'Solar flux sample', altitudeUnit: 'km', source: 'NASA CERES NOAA-20', live: false, date: '2021-02-13', region: 'Mongolia, 1-degree grid' },
         { id: 'sea', label: 'Ships', altitudeUnit: 'km', source: null, live: false },
         { id: 'space', label: 'Satellites', altitudeUnit: 'km', source: null, live: false },
         { id: 'hazard', label: 'Hazards', altitudeUnit: 'km', source: null, live: false },
         { id: 'infrastructure', label: 'Infrastructure', altitudeUnit: 'km', source: null, live: false }
       ] });
+    }
+    if (url.pathname === '/api/v1/solar') {
+      const sample = await loadSolarSample();
+      const date = url.searchParams.get('date') || sample.date;
+      if (date !== sample.date) {
+        return json(res, 404, { error: 'sample_date_unavailable', availableDates: [sample.date] });
+      }
+      const hour = url.searchParams.get('hour');
+      if (hour !== null && Number(hour) !== sample.hourUtc) {
+        return json(res, 404, { error: 'sample_hour_unavailable', availableHoursUtc: [sample.hourUtc] });
+      }
+      const records = filterSolarRecords(sample.records, url.searchParams);
+      return json(res, 200, {
+        dataset: sample.dataset,
+        date: sample.date,
+        hourUtc: sample.hourUtc,
+        historical: true,
+        live: false,
+        region: sample.region,
+        grid: sample.grid,
+        timeStandard: sample.timeStandard,
+        source: sample.sourceVariables,
+        sourceDoi: sample.sourceDoi,
+        units: 'W m-2',
+        count: records.length,
+        records
+      });
     }
     if (url.pathname === '/api/v1/entities') {
       const live = await refreshAircraft();
