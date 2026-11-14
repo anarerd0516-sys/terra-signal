@@ -6,8 +6,20 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const port = Number(process.env.PORT || 3000);
 const host = '0.0.0.0';
-const cacheMs = 6 * 60 * 1000;
-let aircraftCache = { expires: 0, entities: null, error: null, sourceTime: null };
+// OpenSky's anonymous global snapshots are quota-limited. Fifteen-minute
+// caching keeps a continuously running instance below its documented daily
+// anonymous credit budget; authenticated requests can refresh more often.
+const anonymousCacheMs = 15 * 60 * 1000;
+const authenticatedCacheMs = 5 * 60 * 1000;
+const errorCacheMs = 60 * 1000;
+let aircraftCache = {
+  expires: 0,
+  entities: [],
+  error: null,
+  sourceTime: null,
+  stale: false,
+  staleSince: null
+};
 let tokenCache = { token: null, expires: 0 };
 let aircraftRefreshPromise = null;
 
@@ -72,8 +84,12 @@ async function loadAircraft() {
   try {
     const token = await openskyToken();
     const response = await fetch('https://opensky-network.org/api/states/all', {
-      headers: token ? { authorization: `Bearer ${token}` } : {},
-      signal: AbortSignal.timeout(18_000)
+      headers: {
+        accept: 'application/json',
+        'user-agent': 'TerraSignal/1.0 (+https://spacehorse.onrender.com)',
+        ...(token ? { authorization: `Bearer ${token}` } : {})
+      },
+      signal: AbortSignal.timeout(10_000)
     });
     if (!response.ok) throw new Error(`OpenSky returned ${response.status}`);
     const data = await response.json();
@@ -96,9 +112,29 @@ async function loadAircraft() {
         timestamp: Number.isFinite(row[4]) ? new Date(row[4] * 1000).toISOString() : fetchedAt
       };
     });
-    aircraftCache = { expires: Date.now() + cacheMs, entities, error: null, sourceTime: fetchedAt };
+    aircraftCache = {
+      expires: Date.now() + (token ? authenticatedCacheMs : anonymousCacheMs),
+      entities,
+      error: null,
+      sourceTime: Number.isFinite(data.time) ? new Date(data.time * 1000).toISOString() : fetchedAt,
+      stale: false,
+      staleSince: null
+    };
   } catch (error) {
-    aircraftCache = { expires: Date.now() + cacheMs, entities: [], error: error.message, sourceTime: null };
+    const previous = aircraftCache;
+    const cause = error?.cause?.code || error?.cause?.message || error.message;
+    console.error(JSON.stringify({
+      event: 'aircraft_source_unavailable',
+      message: error.message,
+      cause
+    }));
+    aircraftCache = {
+      ...previous,
+      expires: Date.now() + errorCacheMs,
+      error: 'upstream_unavailable',
+      stale: Boolean(previous.sourceTime && previous.entities.length),
+      staleSince: previous.staleSince || new Date().toISOString()
+    };
   }
   return aircraftCache;
 }
@@ -126,7 +162,14 @@ function filterEntities(entities, params) {
 }
 
 async function serveStatic(pathname, res) {
-  let relative = decodeURIComponent(pathname === '/' ? '/index.html' : pathname);
+  let relative;
+  try {
+    relative = decodeURIComponent(pathname === '/' ? '/index.html' : pathname);
+  } catch {
+    res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' });
+    res.end('Bad path');
+    return;
+  }
   const target = resolve(root, `.${relative}`);
   if (target !== root && !target.startsWith(root + sep)) {
     res.writeHead(403); res.end('Forbidden'); return;
@@ -142,38 +185,53 @@ async function serveStatic(pathname, res) {
 }
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-  if (req.method === 'OPTIONS') return json(res, 204, {});
-  if (req.method !== 'GET') return json(res, 405, { error: 'method_not_allowed', message: 'Use GET for this read-only API.' });
+  try {
+    const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'access-control-allow-origin': '*',
+        'access-control-allow-methods': 'GET, OPTIONS',
+        'access-control-allow-headers': 'content-type'
+      });
+      return res.end();
+    }
+    if (req.method !== 'GET') return json(res, 405, { error: 'method_not_allowed', message: 'Use GET for this read-only API.' });
 
-  if (url.pathname === '/api/health') {
-    return json(res, 200, { status: 'ok', service: 'terra-signal-api', timestamp: new Date().toISOString() });
+    if (url.pathname === '/api/health') {
+      return json(res, 200, { status: 'ok', service: 'terra-signal-api', timestamp: new Date().toISOString() });
+    }
+    if (url.pathname === '/api/v1/layers') {
+      return json(res, 200, { layers: [
+        { id: 'surface', label: 'Surface', altitudeUnit: 'km', source: 'Three.js globe' },
+        { id: 'air', label: 'Aircraft', altitudeUnit: 'km', source: 'OpenSky Network', live: true },
+        { id: 'sea', label: 'Ships', altitudeUnit: 'km', source: null, live: false },
+        { id: 'space', label: 'Satellites', altitudeUnit: 'km', source: null, live: false },
+        { id: 'hazard', label: 'Hazards', altitudeUnit: 'km', source: null, live: false },
+        { id: 'infrastructure', label: 'Infrastructure', altitudeUnit: 'km', source: null, live: false }
+      ] });
+    }
+    if (url.pathname === '/api/v1/entities') {
+      const live = await refreshAircraft();
+      const entities = filterEntities(live.entities, url.searchParams);
+      return json(res, live.error && !live.stale ? 503 : 200, {
+        entities,
+        count: entities.length,
+        updatedAt: live.sourceTime,
+        source: 'OpenSky Network',
+        live: !live.error,
+        stale: live.stale,
+        staleSince: live.staleSince,
+        cachedUntil: live.expires ? new Date(live.expires).toISOString() : null,
+        ...(live.error ? { error: 'upstream_unavailable', message: 'Aircraft data source is temporarily unavailable.' } : {})
+      });
+    }
+    if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'not_found' });
+    return await serveStatic(url.pathname, res);
+  } catch (error) {
+    console.error('Request failed:', error);
+    if (!res.headersSent) return json(res, 500, { error: 'internal_error' });
+    res.destroy();
   }
-  if (url.pathname === '/api/v1/layers') {
-    return json(res, 200, { layers: [
-      { id: 'surface', label: 'Surface', altitudeUnit: 'km', source: 'Three.js globe' },
-      { id: 'air', label: 'Aircraft', altitudeUnit: 'km', source: 'OpenSky Network', live: true },
-      { id: 'sea', label: 'Ships', altitudeUnit: 'km', source: null, live: false },
-      { id: 'space', label: 'Satellites', altitudeUnit: 'km', source: null, live: false },
-      { id: 'hazard', label: 'Hazards', altitudeUnit: 'km', source: null, live: false },
-      { id: 'infrastructure', label: 'Infrastructure', altitudeUnit: 'km', source: null, live: false }
-    ] });
-  }
-  if (url.pathname === '/api/v1/entities') {
-    const live = await refreshAircraft();
-    const entities = filterEntities(live.entities, url.searchParams);
-    return json(res, live.error ? 503 : 200, {
-      entities,
-      count: entities.length,
-      updatedAt: live.sourceTime,
-      source: 'OpenSky Network',
-      live: !live.error,
-      cachedUntil: live.expires ? new Date(live.expires).toISOString() : null,
-      ...(live.error ? { error: 'upstream_unavailable', message: live.error } : {})
-    });
-  }
-  if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'not_found' });
-  return serveStatic(url.pathname, res);
 });
 
 server.listen(port, host, () => console.log(`Terra Signal listening on http://${host}:${port}`));
