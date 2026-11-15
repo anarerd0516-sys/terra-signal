@@ -1,13 +1,12 @@
 {
   "title": "The most matched measurement thresholds on both between mars and moon",
-  "interpretation": "Primary approximate matched readings supplied for Moon and Mars comparison. These are not validated planetary suitability thresholds and do not establish that an Earth coordinate is physically equivalent to a lunar or Martian site.",
   "measurements": [
     {
       "id": 1,
       "parameter": "Surface Temperature",
       "coordinate": "-15.157°, -51.810°",
       "latitude": -15.157,
-      "longitude": -51.810,
+      "longitude": -51.81,
       "magnitude": "58.3C"
     },
     {

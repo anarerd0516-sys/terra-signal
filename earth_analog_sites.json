@@ -11,12 +11,19 @@
       "country": "USA",
       "locationLabel": "near Hanksville, Utah, USA",
       "latitude": 38.40646,
-      "longitude": -110.79190,
+      "longitude": -110.7919,
       "coordinatePrecision": "site",
       "focus": "Habitat in a red desert; Mars-style schedules; crew life and psychology.",
-      "target": ["Mars"],
-      "parameters": ["Soil", "Isolation"],
-      "source": "https://www.sciencedirect.com/org/science/article/pii/S1314283616000531"
+      "target": [
+        "Mars"
+      ],
+      "parameters": [
+        "Soil",
+        "Isolation"
+      ],
+      "source": "https://www.sciencedirect.com/org/science/article/pii/S1314283616000531",
+      "facilityType": "habitat_or_station",
+      "facilityClassificationBasis": "Supplied site description; not a verification of current operational status."
     },
     {
       "id": "hi-seas",
@@ -27,12 +34,20 @@
       "country": "USA",
       "locationLabel": "Mauna Loa, Hawaii, USA",
       "latitude": 19.60306,
-      "longitude": -155.48750,
+      "longitude": -155.4875,
       "coordinatePrecision": "site",
       "focus": "Dome habitat on a barren lava field; health and human factors, stress management, and team cohesion.",
-      "target": ["Mars", "Moon"],
-      "parameters": ["Soil", "Isolation"],
-      "source": "https://www.hi-seas.org/"
+      "target": [
+        "Mars",
+        "Moon"
+      ],
+      "parameters": [
+        "Soil",
+        "Isolation"
+      ],
+      "source": "https://www.hi-seas.org/",
+      "facilityType": "habitat_or_station",
+      "facilityClassificationBasis": "Supplied site description; not a verification of current operational status."
     },
     {
       "id": "concordia",
@@ -42,13 +57,21 @@
       "state": "Antarctic Plateau",
       "country": "Antarctica",
       "locationLabel": "Dome C, Antarctic Plateau",
-      "latitude": -75.10,
+      "latitude": -75.1,
       "longitude": 123.35,
       "coordinatePrecision": "site",
       "focus": "Remote winter-over research station studying crew life and psychology in extreme isolation and cold.",
-      "target": ["Mars (isolation and cold)"],
-      "parameters": ["Water", "Power", "Isolation"],
-      "source": "https://www.isp.cnr.it/index.php/en/infrastructures/research-stations/concordia"
+      "target": [
+        "Mars (isolation and cold)"
+      ],
+      "parameters": [
+        "Water",
+        "Power",
+        "Isolation"
+      ],
+      "source": "https://www.isp.cnr.it/index.php/en/infrastructures/research-stations/concordia",
+      "facilityType": "habitat_or_station",
+      "facilityClassificationBasis": "Supplied site description; not a verification of current operational status."
     },
     {
       "id": "lunares",
@@ -58,13 +81,19 @@
       "state": "Greater Poland",
       "country": "Poland",
       "locationLabel": "Piła, Poland",
-      "latitude": 53.17450,
-      "longitude": 16.72610,
+      "latitude": 53.1745,
+      "longitude": 16.7261,
       "coordinatePrecision": "approximate",
       "focus": "Small isolated habitat in an airport hangar.",
-      "target": ["Moon"],
-      "parameters": ["Isolation"],
-      "source": "https://lunares.space/"
+      "target": [
+        "Moon"
+      ],
+      "parameters": [
+        "Isolation"
+      ],
+      "source": "https://lunares.space/",
+      "facilityType": "habitat_or_station",
+      "facilityClassificationBasis": "Supplied site description; not a verification of current operational status."
     },
     {
       "id": "sirius",
@@ -74,13 +103,19 @@
       "state": "Moscow",
       "country": "Russia",
       "locationLabel": "Moscow, Russia (city-level position)",
-      "latitude": 55.75580,
-      "longitude": 37.61730,
+      "latitude": 55.7558,
+      "longitude": 37.6173,
       "coordinatePrecision": "city",
       "focus": "Sealed connected-room habitat for crew-life and psychology studies.",
-      "target": ["Moon"],
-      "parameters": ["Isolation"],
-      "source": "https://www.nasa.gov/wp-content/uploads/2018/10/sirius-17.pdf"
+      "target": [
+        "Moon"
+      ],
+      "parameters": [
+        "Isolation"
+      ],
+      "source": "https://www.nasa.gov/wp-content/uploads/2018/10/sirius-17.pdf",
+      "facilityType": "habitat_or_station",
+      "facilityClassificationBasis": "Supplied site description; not a verification of current operational status."
     },
     {
       "id": "neemo",
@@ -90,13 +125,21 @@
       "state": "Florida",
       "country": "USA",
       "locationLabel": "Conch Reef, Florida Keys, USA",
-      "latitude": 24.95020,
-      "longitude": -80.45340,
+      "latitude": 24.9502,
+      "longitude": -80.4534,
       "coordinatePrecision": "site",
       "focus": "Underwater habitat for crew operations and EVA practice.",
-      "target": ["Mars", "Moon"],
-      "parameters": ["Isolation", "Gravity"],
-      "source": "https://case.fiu.edu/education-outreach/fiuhome/explore/your-world/2021/explore-aquarius-reef-base.html"
+      "target": [
+        "Mars",
+        "Moon"
+      ],
+      "parameters": [
+        "Isolation",
+        "Gravity"
+      ],
+      "source": "https://case.fiu.edu/education-outreach/fiuhome/explore/your-world/2021/explore-aquarius-reef-base.html",
+      "facilityType": "habitat_or_station",
+      "facilityClassificationBasis": "Supplied site description; not a verification of current operational status."
     },
     {
       "id": "pisces",
@@ -106,13 +149,19 @@
       "state": "Hawaii",
       "country": "USA",
       "locationLabel": "Hilo, Hawaii, USA (city-level position)",
-      "latitude": 19.70740,
-      "longitude": -155.08850,
+      "latitude": 19.7074,
+      "longitude": -155.0885,
       "coordinatePrecision": "city",
       "focus": "Tests technology and construction materials using lunar-like volcanic soil.",
-      "target": ["Moon"],
-      "parameters": ["Soil"],
-      "source": "https://pacificspacecenter.com/"
+      "target": [
+        "Moon"
+      ],
+      "parameters": [
+        "Soil"
+      ],
+      "source": "https://pacificspacecenter.com/",
+      "facilityType": "research_center",
+      "facilityClassificationBasis": "Supplied site description; not a verification of current operational status."
     }
   ]
 }

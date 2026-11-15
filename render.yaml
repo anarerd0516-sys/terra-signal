@@ -1,11 +1,6 @@
 services:
   - type: web
     name: terra-signal
-    runtime: node
+    runtime: docker
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
     healthCheckPath: /api/health
-    envVars:
-      - key: NODE_VERSION
-        value: 20

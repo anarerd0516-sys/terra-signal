@@ -4,192 +4,372 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07100e">
-  <title>Terra Signal — Earth, in motion</title>
+  <title>Spacehorse — Earth, in motion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{color-scheme:dark;--bg:#07100e;--panel:#0b1512;--panel2:#101d18;--line:#20312a;--text:#e8f1eb;--muted:#80938a;--green:#c8f27b;--mint:#5ee0ae;--cyan:#69c9ff;--amber:#ffbd69;--violet:#b8a4ff;--mono:'DM Mono',monospace;--sans:Inter,Segoe UI,sans-serif;--display:Inter,Segoe UI,sans-serif}
-    *{box-sizing:border-box}html,body{margin:0;height:100%}body{background:var(--bg);color:var(--text);font:13px var(--sans);overflow:hidden}button,input{font:inherit}button{color:inherit;cursor:pointer}.app{height:100vh;display:grid;grid-template-rows:58px 1fr;position:relative;overflow:hidden;background:radial-gradient(ellipse at 57% 48%,#10241a 0,#08120f 48%,#050b09 100%)}
+    :root{color-scheme:dark;--bg:#07100e;--panel:#0b1512;--panel2:#101d18;--line:#20312a;--text:#e8f1eb;--muted:#80938a;--green:#c8f27b;--mint:#5ee0ae;--cyan:#69c9ff;--amber:#ffbd69;--violet:#b8a4ff;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Space Grotesk',sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px var(--sans);overflow:hidden}button,input{font:inherit}button{color:inherit;cursor:pointer}.app{height:100dvh;min-height:620px;display:grid;grid-template-rows:58px 1fr;position:relative;overflow:hidden;background:radial-gradient(ellipse at 57% 48%,#10241a 0,#08120f 48%,#050b09 100%)}
     header{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 23px;border-bottom:1px solid #23342caa;background:#07100edd;z-index:10;backdrop-filter:blur(18px)}.brand{display:flex;align-items:center;gap:11px;font:600 15px var(--display);letter-spacing:.02em}.brandmark{width:26px;height:26px;display:grid;place-items:center;border:1px solid #52765a;color:var(--green);border-radius:50%;font-size:16px}.brand small{font:9px var(--mono);color:#83958a;letter-spacing:.15em;margin-left:7px}.header-center{display:flex;gap:20px;color:#91a49a;font:9px var(--mono);letter-spacing:.08em}.live{color:var(--mint)}.live:before{content:'';display:inline-block;width:6px;height:6px;background:var(--mint);border-radius:50%;margin:0 8px 1px 0;box-shadow:0 0 9px #5ee0ae99}.header-right{font:9px var(--mono);color:var(--muted);letter-spacing:.1em}
-    main{position:relative;min-height:0}.globe-shell{position:absolute;inset:0;overflow:hidden}.globe{position:absolute;inset:0;width:100%;height:100%}.map-overlay{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 55% 48%,transparent 35%,#06100da8 100%);z-index:1}.panel{position:absolute;z-index:3;top:18px;bottom:18px;width:300px;background:#0b1512e8;border:1px solid #24372f;border-radius:12px;backdrop-filter:blur(18px);box-shadow:0 16px 60px #0005;overflow:auto;scrollbar-width:thin;scrollbar-color:#304239 transparent}.panel.left{left:18px}.panel.right{right:18px;width:270px;padding:17px}.panel-content{padding:18px}.eyebrow{font:9px var(--mono);letter-spacing:.15em;color:var(--mint);text-transform:uppercase}.panel h1{font:500 27px/1.06 var(--display);letter-spacing:-1.3px;margin:11px 0 9px}.lede{color:#96a99d;font-size:11px;line-height:1.55;margin:0}.section{border-top:1px solid var(--line);padding-top:14px;margin-top:17px}.section-title{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px;font:600 11px var(--display);letter-spacing:.02em}.section-title span{font:9px var(--mono);color:var(--muted);font-weight:400;letter-spacing:.08em}.search{display:flex;gap:6px}.search input{min-width:0;flex:1;background:#07100d;border:1px solid #2d4036;border-radius:6px;padding:9px 10px;color:var(--text);font-size:10px;outline:0}.search input:focus{border-color:#89b874}.search button{border:1px solid #526b4c;background:#253322;color:var(--green);border-radius:6px;padding:0 11px;font-size:10px}.search-note{font:9px var(--mono);color:var(--muted);margin-top:7px;min-height:12px}.domain-list{display:grid;gap:6px}.domain{height:37px;width:100%;display:flex;align-items:center;gap:9px;text-align:left;padding:0 10px;background:#101c17;border:1px solid #23362d;border-radius:6px;color:#a8b8ad;font-size:10px}.domain:hover{border-color:#4d6752}.domain.active{background:#1a2a20;color:#e6f1e7;border-color:#526b4b}.domain input{accent-color:var(--green);margin:0}.domain .count{margin-left:auto;font:9px var(--mono);color:#71877a}.swatch{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px currentColor}.swatch.air{background:var(--cyan)}.swatch.sea{background:var(--mint)}.swatch.space{background:var(--violet)}.swatch.hazard{background:var(--amber)}
+    main{position:relative;min-height:0}.globe-shell{position:absolute;inset:0;overflow:hidden}#globe{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none}.flat-map{position:absolute;inset:0;width:100%;height:100%;display:none;cursor:crosshair}.map-overlay{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 55% 48%,transparent 35%,#06100da8 100%);z-index:1}.panel{position:absolute;z-index:3;top:18px;bottom:18px;width:300px;background:#0b1512e8;border:1px solid #24372f;border-radius:12px;backdrop-filter:blur(18px);box-shadow:0 16px 60px #0005;overflow:auto;scrollbar-width:thin;scrollbar-color:#304239 transparent}.panel.left{left:18px}.panel.right{right:18px;width:270px;padding:17px}.panel-content{padding:18px}.eyebrow{font:9px var(--mono);letter-spacing:.15em;color:var(--mint);text-transform:uppercase}.panel h1{font:500 27px/1.06 var(--display);letter-spacing:-1.3px;margin:11px 0 9px}.lede{color:#96a99d;font-size:11px;line-height:1.55;margin:0}.section{border-top:1px solid var(--line);padding-top:14px;margin-top:17px}.section-title{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px;font:600 11px var(--display);letter-spacing:.02em}.section-title span{font:9px var(--mono);color:var(--muted);font-weight:400;letter-spacing:.08em}.search{display:flex;gap:6px}.search input{min-width:0;flex:1;background:#07100d;border:1px solid #2d4036;border-radius:6px;padding:9px 10px;color:var(--text);font-size:10px;outline:0}.search input:focus{border-color:#89b874}.search button{border:1px solid #526b4c;background:#253322;color:var(--green);border-radius:6px;padding:0 11px;font-size:10px}.search-note{font:9px var(--mono);color:var(--muted);margin-top:7px;min-height:12px}
+    .domain-list{display:grid;gap:6px}.domain{height:37px;width:100%;display:flex;align-items:center;gap:9px;text-align:left;padding:0 10px;background:#101c17;border:1px solid #23362d;border-radius:6px;color:#a8b8ad;font-size:10px}.domain:hover{border-color:#4d6752}.domain.active{background:#1a2a20;color:#e6f1e7;border-color:#526b4b}.domain input{accent-color:var(--green);margin:0}.domain .count{margin-left:auto;font:9px var(--mono);color:#71877a}.swatch{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px currentColor}.swatch.air{background:var(--cyan)}.swatch.sea{background:var(--mint)}.swatch.space{background:var(--violet)}.swatch.hazard{background:var(--amber)}.analog-directory{display:grid;gap:6px}.analog-card{width:100%;display:block;text-align:left;padding:8px 9px;background:#101c17;border:1px solid #23362d;border-radius:7px;color:#dce8de}.analog-card:hover,.analog-card:focus-visible{border-color:#62d6c4;outline:none}.analog-card b{display:block;font:600 10px var(--display)}.analog-card small{display:block;margin-top:3px;color:#85998d;font:8px var(--mono)}.analog-card .site-tags{margin-top:6px}
+    .altitude{font:9px var(--mono);color:#9aaca1}.altitude input{width:100%;margin:12px 0 5px;accent-color:var(--green)}.range-labels{display:flex;justify-content:space-between;color:#6e8377;font:8px var(--mono)}.layer-row{display:flex;align-items:center;justify-content:space-between;color:#a6b7ab;font-size:10px;padding:8px 0;border-bottom:1px solid #1b2a23}.switch{width:28px;height:16px;padding:2px;background:#26372d;border:0;border-radius:20px}.switch:after{content:'';display:block;width:12px;height:12px;background:#75867a;border-radius:50%;transition:transform .18s}.switch.on{background:#526e3e}.switch.on:after{background:var(--green);transform:translateX(12px)}
+    .detail-card{background:#101c17;border:1px solid #263a30;border-radius:8px;padding:12px;margin-top:12px}.detail-head{display:flex;align-items:center;gap:9px}.detail-icon{width:29px;height:29px;border-radius:7px;background:#213329;display:grid;place-items:center;color:var(--green);font-size:13px}.detail-head b{display:block;font:600 11px var(--display)}.detail-head small{display:block;color:var(--muted);font:8px var(--mono);margin-top:3px}.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px}.datum small{display:block;color:#71847a;font:8px var(--mono);letter-spacing:.08em;margin-bottom:4px}.datum b{font:10px var(--mono);font-weight:400;color:#dce8de}.feed-status{display:flex;align-items:center;gap:7px;color:#9aada0;font:9px var(--mono);padding:9px 0}.feed-status i{width:6px;height:6px;background:var(--amber);border-radius:50%}.feed-copy{font-size:9px;color:#778a7e;line-height:1.55}.site-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}.site-tag{display:inline-block;padding:4px 7px;border:1px solid #3a574d;border-radius:99px;background:#14251f;color:#8ce1d0;font:8px var(--mono);text-transform:uppercase}.legend{display:grid;gap:8px}.legend-item{display:flex;align-items:center;gap:8px;color:#9aaca1;font-size:9px}.legend-line{height:1px;flex:1;background:#20322a}.legend-item code{color:#71847a;font:8px var(--mono)}
     .hud-top{position:absolute;z-index:2;left:50%;top:20px;transform:translateX(-50%);display:flex;gap:7px;pointer-events:auto}.hud-chip{display:flex;gap:7px;align-items:center;padding:8px 11px;border:1px solid #294036;background:#0b1612d9;backdrop-filter:blur(12px);border-radius:6px;color:#9cad9f;font:9px var(--mono);letter-spacing:.05em}.hud-chip b{font-weight:400;color:var(--green)}.hud-chip button{border:0;background:none;color:var(--green);padding:0;font:9px var(--mono)}.bottom-hud{position:absolute;z-index:2;left:50%;bottom:27px;transform:translateX(-50%);display:flex;align-items:center;gap:17px;color:#809389;font:9px var(--mono);letter-spacing:.05em;pointer-events:none}.bottom-hud span{display:flex;align-items:center;gap:6px}.bottom-hud b{font-weight:400;color:#c0d0c3}.bottom-hud .separator{height:12px;width:1px;background:#34473c}.compass{position:absolute;z-index:2;right:322px;bottom:30px;color:#85988c;font:9px var(--mono);text-align:center;pointer-events:none}.compass strong{font:16px var(--display);color:#c4d2c7;display:block;margin-bottom:3px}.toast{position:absolute;z-index:4;top:72px;left:50%;transform:translateX(-50%);padding:8px 12px;border:1px solid #40594b;background:#0b1712;color:#b6c9bb;border-radius:6px;font:9px var(--mono);display:none}.toast.show{display:block}
+    .ownership{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);z-index:7;font:9px var(--mono);letter-spacing:.12em;color:#b9cbbbbb;pointer-events:none;white-space:nowrap}.candidate-controls input[type=number]{width:80px;background:#14251f;color:#e8f1eb;border:1px solid #3a574d;padding:5px}.candidate-controls button{padding:7px;background:#213329;border:1px solid #526b4b;border-radius:5px;margin:6px 0}.reference-table{width:100%;font-size:10px}.reference-table td{padding:6px 3px;border-bottom:1px solid #263a30}
+    .reading-group{border-top:1px solid var(--line);margin-top:16px;padding-top:10px}.reading-group h3{font-size:12px;color:var(--mint)}.reading-group summary{cursor:pointer;padding:12px 0;color:var(--green);font-size:11px}.reading-group .data-grid{grid-template-columns:1fr}.reading-group small{overflow-wrap:anywhere}.close-reading{display:none}#detailPanel>a{color:var(--mint)}
+    @media(max-width:680px){.panel.right.has-selection{display:block;z-index:6;width:100%!important;height:52%;box-sizing:border-box}.close-reading{display:block;position:sticky;top:0;margin-left:auto;padding:8px 12px;background:#1a2a20;border:1px solid #526b4b;border-radius:6px}}
     @media(max-width:900px){.panel{width:260px}.panel.right{width:238px}.compass{right:255px}.header-center{display:none}}
-    @media(max-width:680px){body{overflow:auto}.app{height:100dvh;min-height:560px;grid-template-rows:52px 1fr}.brand small{display:none}header{height:52px;padding:0 13px}.header-right{display:none}.panel{top:auto;bottom:0;width:auto!important;height:42%;left:0!important;right:0!important;border-radius:12px 12px 0 0;border-bottom:0}.panel.right{display:none}.panel-content{padding:14px 16px}.panel h1{font-size:23px;margin:7px 0}.lede{max-width:440px}.section{padding-top:11px;margin-top:12px}.domain-list{grid-template-columns:1fr 1fr}.domain{height:32px}.hud-top{top:12px;left:auto;right:12px;transform:none}.bottom-hud{bottom:44%;gap:9px}.compass{display:none}.map-overlay{background:linear-gradient(180deg,#06100d22 48%,#06100daa 59%,transparent 82%)}}
-  </style>
+    @media(max-width:680px){body{overflow:auto}.app{height:100dvh;min-height:560px;grid-template-rows:52px 1fr}.brand small{display:none}header{height:52px;padding:0 13px}.header-right{display:none}.panel{top:auto;bottom:0;width:auto!important;height:42%;left:0!important;right:0!important;border-radius:12px 12px 0 0;border-bottom:0}.panel.right{display:none}.panel-content{padding:14px 16px}.panel h1{font-size:23px;margin:7px 0}.lede{max-width:440px}.section{padding-top:11px;margin-top:12px}.domain-list{grid-template-columns:1fr 1fr}.domain{height:32px}.altitude{display:none}.hud-top{top:12px;left:auto;right:12px;transform:none}.hud-chip:first-child{display:none}.bottom-hud{bottom:44%;gap:9px}.compass{display:none}.map-overlay{background:linear-gradient(180deg,#06100d22 48%,#06100daa 59%,transparent 82%)}}
+      .temperature-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.temperature-controls .section-title{grid-column:1/-1;margin-bottom:0}.temperature-controls label{display:grid;gap:5px;color:#84978b;font:8px var(--mono);letter-spacing:.08em;text-transform:uppercase}.temperature-controls select{width:100%;min-width:0;padding:7px 8px;border:1px solid #2d4036;border-radius:6px;background:#07100d;color:var(--text);font:9px var(--sans)}.temperature-status,.temperature-legend{grid-column:1/-1;color:#82958a;font:8px var(--mono)}.temperature-legend{display:flex;align-items:center;gap:8px}.temperature-legend i{height:7px;flex:1;border-radius:5px;background:linear-gradient(90deg,#2166ac,#67a9cf,#f7f7f7,#ef8a62,#b2182b)}
+      .environmental-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.environmental-controls .section-title{grid-column:1/-1;margin-bottom:0}.environmental-controls label{display:grid;gap:5px;color:#84978b;font:8px var(--mono);letter-spacing:.08em;text-transform:uppercase}.environmental-controls [hidden]{display:none}.environmental-controls select{width:100%;min-width:0;padding:7px 8px;border:1px solid #2d4036;border-radius:6px;background:#07100d;color:var(--text);font:9px var(--sans)}.environmental-status,.environmental-legend{grid-column:1/-1;color:#82958a;font:8px var(--mono)}.environmental-legend{display:flex;align-items:center;gap:8px}.environmental-legend i{height:7px;flex:1;border-radius:5px;background:linear-gradient(90deg,#2166ac,#67a9cf,#f7f7f7,#ef8a62,#b2182b)}.map-tooltip{position:absolute;z-index:2;display:none;max-width:235px;padding:9px 11px;border:1px solid #60765a;background:#09130ff2;color:#e2eee5;border-radius:7px;box-shadow:0 8px 24px #0008;pointer-events:none;font:10px/1.4 var(--sans)}.map-tooltip b{display:block;color:#ffd166;font:600 11px var(--display);margin-bottom:3px}.map-tooltip span{color:#b4c5b8}  
+.layer-info{margin-left:auto;flex-shrink:0;width:23px;height:23px;border:1px solid #4a6557;border-radius:50%;background:#14251f;color:var(--mint);font:12px var(--sans)}
+.layer-dialog{width:min(430px,calc(100vw - 36px));box-sizing:border-box;padding:24px;border:1px solid #526b4b;border-radius:14px;background:#0b1712;color:var(--text);box-shadow:0 24px 90px #0009}.layer-dialog::backdrop{background:#020906b8;backdrop-filter:blur(3px)}.layer-dialog h2{font-size:20px;margin:0 30px 18px 0}.layer-dialog h3{color:var(--mint);font-size:11px;margin:17px 0 5px}.layer-dialog p{color:#b4c5b8;line-height:1.6;font-size:12px;margin:0}.layer-dialog .close{float:right;border:1px solid #3a574d;background:#14251f;color:var(--text);border-radius:5px;padding:5px 9px}.layer-dialog small{display:block;color:#83998b;margin-top:17px;font-size:10px;line-height:1.5}
+</style>
 </head>
 <body>
   <div class="app">
     <header>
-      <div class="brand"><span class="brandmark">◎</span>TERRA SIGNAL <small>EARTH TO MOON TO MARS</small></div>
+      <div class="brand"><span class="brandmark">◎</span>SPACEHORSE <small>EARTH TO MOON TO MARS</small></div>
       <div class="header-center"><span>EARTH MISSION SITES</span><span>MOON &amp; MARS SUPPORT</span><span>EARTH ANALOGS</span></div>
       <div class="header-right"><span class="live">MISSION DATA</span> &nbsp;·&nbsp; UTC <span id="utcClock">--:--:--</span></div>
     </header>
     <main>
       <div class="globe-shell">
-        <canvas id="globe" class="globe" aria-label="Interactive three-dimensional Earth globe"></canvas>
+        <canvas id="globe" aria-label="Interactive three-dimensional Earth globe"></canvas>
+        <canvas id="flatMap" class="flat-map" aria-label="Interactive two-dimensional Earth map"></canvas>
         <div class="map-overlay"></div>
+        <div class="map-tooltip" id="mapTooltip" role="status"></div>
       </div>
-      <div class="hud-top"><div class="hud-chip"><button id="refreshData">REFRESH DATA</button></div><div class="hud-chip"><button id="homeView">RESET VIEW</button></div></div>
-      <div class="bottom-hud"><span>VIEW <b id="viewModeLabel">3D GLOBE</b></span><i class="separator"></i><span>OBJECTS <b id="visibleCount">00</b></span><i class="separator"></i><span>DATA <b>LIVE</b></span></div>
+      <div class="hud-top">
+        <div class="hud-chip"><button id="viewModeToggle">SWITCH TO 2D MAP</button></div>
+        <div class="hud-chip"><button id="homeView">RESET VIEW</button></div>
+      </div>
+      <div class="bottom-hud"><span>VIEW <b id="viewModeLabel">3D GLOBE</b></span><i class="separator"></i><span>SITES <b id="visibleCount">15</b></span><i class="separator"></i><span>DATA <b>SELECTABLE</b></span></div>
       <div class="compass"><strong>N</strong>ROTATE TO EXPLORE</div>
       <div class="toast" id="toast"></div>
       <aside class="panel left"><div class="panel-content">
-        <div class="eyebrow">One planet · many signals</div><h1>Earth in motion.</h1><p class="lede">Track aircraft in flight and local solar observations on a live 3D globe. This version is intentionally simple and works with the current backend API.</p>
-        <div class="section"><div class="section-title">Jump to coordinates <span>LOCATION</span></div><form id="searchForm" class="search"><input id="searchInput" placeholder="Latitude, longitude" aria-label="Search coordinates"><button>GO</button></form><div class="search-note" id="searchNote">Example: 34.05, -118.25</div></div>
-        <div class="section"><div class="section-title">Layers <span>TOGGLE</span></div><div class="domain-list">
-          <label class="domain active"><i class="swatch air"></i><input type="checkbox" data-kind="air" checked>Aircraft</label>
-          <label class="domain active"><i class="swatch space"></i><input type="checkbox" data-kind="solar" checked>Solar sample</label>
-          <label class="domain active"><i class="swatch sea"></i><input type="checkbox" data-kind="surface" checked>Surface glow</label>
+        <div class="eyebrow">Earth-based mission network</div><h1>Earth-based Moon<br>&amp; Mars analogs.</h1><p class="lede">Explore the centers, test sites, and science supporting lunar and Martian missions.</p>
+        <div class="section"><div class="section-title">Find a place <span>SEARCH</span></div><form id="searchForm" class="search"><input id="searchInput" placeholder="Center, city, or coordinates" aria-label="Search a center, city, or coordinates"><button>FIND</button></form><div class="search-note" id="searchNote">Try Johnson Space Center, MDRS, HI-SEAS, or coordinates.</div></div>
+        <div class="section"><div class="section-title">Map layers <span>DOUBLE-CLICK FOR INFO</span></div><div class="domain-list">
+          <label class="domain"><i class="swatch" style="background:#ed9a53"></i><input type="checkbox" data-kind="temperature">Surface temperature · archived MODIS</label>
+          <label class="domain active"><i class="swatch" style="background:#ed665b"></i><input type="checkbox" data-kind="radiation">Radiation</label>
+          <label class="domain"><i class="swatch" style="background:#4cc6b3"></i><input type="checkbox" data-kind="water">Soil water · SMAP</label>
+          <label class="domain"><i class="swatch" style="background:#d2bd68"></i><input type="checkbox" data-kind="soil">Soil moisture</label>
+          <label class="domain"><i class="swatch" style="background:#79a9e8"></i><input type="checkbox" data-kind="atmosphere">Atmosphere</label>
+          <label>Mission target<select id="missionTarget"><option value="all">Moon &amp; Mars — all sites</option><option value="moon">Moon</option><option value="mars">Mars</option><option value="both">Both Moon and Mars</option></select></label>
+          <span hidden><input type="checkbox" data-kind="nasa-bases" checked><input type="checkbox" data-kind="earth-analogs" checked></span>
         </div></div>
+        <div class="section"><a href="/nasa.html" style="display:block;color:var(--mint);margin-bottom:12px">Open Moon &amp; Mars mission map and reference parameters ↗</a><a href="/matched-magnitude.html" style="display:block;color:var(--mint);margin-bottom:12px">Explore matched magnitude coordinates ↗</a><div class="section-title">Mission site guide <span id="analogCount">7 SITES</span></div><div class="analog-directory" id="analogDirectory" aria-live="polite"></div></div>
+        <div class="section temperature-controls" aria-label="Temperature map controls">
+          <div class="section-title">Land temperature <span>MOD21C2</span></div>
+          <label>8-day observation period (not live weather)<select id="temperaturePeriod" disabled><option>Loading periods…</option></select></label>
+          <label>Observation<select id="temperatureView"><option value="day">Day</option><option value="night">Night</option></select></label>
+          <div class="temperature-status" id="temperatureStatus" role="status">Checking prepared map data…</div>
+          <div class="temperature-legend"><span>−40°C</span><i></i><span>60°C+</span></div>
+        </div>
+        <div class="section environmental-controls" aria-label="Radiation map controls">
+          <div class="section-title">Radiation &amp; energy <span>CERES · GLOBAL 1°</span></div>
+          <label>Cadence<select id="radiationCadence"><option value="weekly">Weekly average</option><option value="monthly">Monthly average</option></select></label>
+          <label id="radiationPlatformLabel" hidden>Platform<select id="radiationPlatform"><option value="NPP">Suomi-NPP</option><option value="NOAA20">NOAA-20</option></select></label>
+          <label>Date<select id="radiationDate" disabled><option>Loading dates…</option></select></label>
+          <label id="radiationHourLabel">Hour (UTC)<select id="radiationHour"></select></label>
+          <label>Measurement<select id="radiationVariable"><option value="toa-sw">Outgoing shortwave · TOA</option><option value="toa-lw">Outgoing longwave · TOA</option><option value="toa-net">Net radiation · TOA</option><option value="solar-in">Incoming solar · TOA</option><option value="surface-sw-down">Downward shortwave · surface</option><option value="surface-lw-down">Downward longwave · surface</option></select></label>
+          <div class="environmental-status" id="radiationStatus" role="status">Loading radiation data…</div>
+          <div class="environmental-legend"><span id="radiationLegendLow">0</span><i></i><span id="radiationLegendHigh">500 W/m²</span></div>
+        </div>
+        <div class="section environmental-controls" aria-label="Hydrosphere map controls">
+          <div class="section-title">Hydrosphere <span>SMAP L3</span></div>
+          <label>Observation date<select id="waterDate" disabled><option>Loading dates…</option></select></label>
+          <label>Pass<select id="waterPass"><option value="am">AM</option><option value="pm">PM</option></select></label>
+          <label>Retrieval<select id="waterVariable"><option value="soil-moisture">DCA</option><option value="soil-moisture-h">SCA-H</option><option value="soil-moisture-v">SCA-V</option></select></label>
+          <div class="environmental-status" id="waterStatus" role="status">Loading soil-moisture data…</div>
+          <div class="environmental-legend"><span>0.0</span><i></i><span>0.6 cm³/cm³</span></div>
+        </div>
+        <div class="section environmental-controls" aria-label="Satellite soil moisture map controls">
+          <div class="section-title">Soil moisture <span>CYGNSS / AMSR2 · DAILY</span></div>
+          <label>Source<select id="soilProduct"><option value="cygnss">CYGNSS · 9 / 36 km</option><option value="amsr2">AMSR2 LPRM</option></select></label><label>Observation date<select id="soilDate" disabled><option>Loading dates…</option></select></label>
+          <label>Parameter<select id="soilVariable"><option value="moisture-c1">Moisture · 6.9 GHz</option><option value="moisture-c2">Moisture · 7.3 GHz</option><option value="moisture-x">Moisture · 10.7 GHz</option><option value="skin-temperature">Skin temperature</option><option value="optical-depth-c1">Optical depth · 6.9 GHz</option></select></label>
+          <div class="environmental-status" id="soilStatus" role="status">Loading AMSR2 data…</div>
+          <div class="environmental-legend"><span id="soilLegendLow">0</span><i></i><span id="soilLegendHigh">60%</span></div>
+        </div>
+        <div class="section environmental-controls" aria-label="Atmosphere map controls">
+          <div class="section-title">Atmosphere indices <span>MERRA-2 · MONTHLY</span></div>
+          <label>Month<select id="atmosphereDate" disabled><option>Loading months…</option></select></label>
+          <label>Parameter<select id="atmosphereVariable" disabled><option value="rx1day">Maximum one-day precipitation</option></select></label>
+          <div class="environmental-status" id="atmosphereStatus" role="status">Loading MERRA-2 data…</div>
+          <div class="environmental-legend"><span id="atmosphereLegendLow">LOW</span><i></i><span id="atmosphereLegendHigh">HIGH · adaptive range</span></div>
+        </div>
+        
+        <div class="section"><div class="section-title">Moon / Mars reference</div><table class="reference-table"><tr><th>Property</th><th>Moon</th><th>Mars</th></tr><tr><td>Surface temperature</td><td>Average not supplied</td><td>≈ −60 °C</td></tr><tr><td>Gravity</td><td>1.6 m/s²</td><td>3.7 m/s²</td></tr><tr><td>Environment</td><td>Near vacuum</td><td>Thin atmosphere</td></tr></table><p class="feed-copy">Provisional values from your reference table. Mars temperature varies by season and place. Earth-site thresholds below are user-defined research filters, not planetary equivalence.</p></div>
+<div class="section candidate-controls"><div class="section-title">Parameter intersections</div><label><input id="intersectionEnabled" type="checkbox"> Highlight matching locations</label><p class="feed-copy">Require both thresholds using selected observation dates. Scan known sites or click any map point to explore a new candidate.</p><label>Surface temperature ≤ <input id="candidateTemp" type="number" value="0" step="1"> °C</label><br><label>SMAP soil water ≤ <input id="candidateWater" type="number" min="0" max="1" step="0.01" value="0.1"> cm³/cm³</label><button id="scanCandidates" type="button">Scan mission sites</button><div id="candidateStatus" class="feed-copy" role="status">Two measured conditions required. Missing data never counts as a match.</div><p class="feed-copy">A match is an exploration lead, not a validated base location. Different dates and grid resolutions apply.</p></div>
+<div class="section"><div class="section-title">Display <span>VIEW</span></div><div class="layer-row">Atmosphere glow <button class="switch on" data-toggle="atmosphere" aria-label="Toggle atmosphere glow"></button></div><div class="layer-row">Auto rotate <button class="switch" data-toggle="rotate" aria-label="Toggle auto rotate"></button></div></div>
       </div></aside>
-    </main>
+      <aside class="panel right"><div class="eyebrow">Selected place or map value</div><div id="detailPanel"><div class="detail-card"><div class="detail-head"><div class="detail-icon">◎</div><div><b>Choose a location</b><small>CLICK A CENTER OR MAP PIXEL</small></div></div><p class="feed-copy">Click a location to see its mission focus and parameters. Turn on a data layer to sample Earth observations there.</p></div></div><div class="section"><div class="section-title">Map key <span>MISSION TARGET</span></div><div class="legend"><div class="legend-item"><i class="swatch" style="background:#85bce5"></i>Moon</div><div class="legend-item"><i class="swatch" style="background:#df806b"></i>Mars</div><div class="legend-item"><i class="swatch" style="background:#c3a0f4"></i>Moon &amp; Mars</div><div class="legend-item"><i class="swatch" style="background:#9aaca1"></i>Target unspecified</div><div class="legend-item"><i class="swatch" style="background:#79f5ff"></i>Supplied parameter match (layer enabled)</div><div class="legend-item"><i class="swatch" style="background:#fff16a"></i>Meets both measurement thresholds</div></div><p class="feed-copy">Bright markers: documented habitats / stations. Subdued markers: other mission and research sites. Brightness does not indicate current operational status. Environmental colors follow each dataset's scale on the left.</p></div></aside>
+    <div class="ownership">property of astartes 67</div></main>
   </div>
   <script type="importmap">
     {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
   </script>
+  <dialog id="layerExplanation" class="layer-dialog" aria-labelledby="layerExplanationTitle"><form method="dialog"><button class="close" aria-label="Close layer explanation">✕</button></form><h2 id="layerExplanationTitle"></h2><h3>What is measured?</h3><p id="layerExplanationBasis"></p><h3>Moon &amp; Mars comparison</h3><p id="layerExplanationComparison"></p><small id="layerExplanationNote"></small></dialog>
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    const canvas = document.getElementById('globe');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100); camera.position.set(0, 0, 8.8);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, false);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    const canvas=document.querySelector('#globe'),flatMap=document.querySelector('#flatMap'),flatContext=flatMap.getContext('2d'),scene=new THREE.Scene();let viewMode='3d',flatBounds=null,selectedBaseId=null;
+    const camera=new THREE.PerspectiveCamera(36,1,.1,100);camera.position.set(0,0,8.4);
+    const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);renderer.outputColorSpace=THREE.SRGBColorSpace;
+    const controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.045;controls.enablePan=false;controls.minDistance=3.2;controls.maxDistance=13;controls.autoRotate=false;controls.autoRotateSpeed=.25;
+    scene.add(new THREE.AmbientLight(0x91b6a3,1.15));const sun=new THREE.DirectionalLight(0xc9e4d1,2.8);sun.position.set(-4,2,5);scene.add(sun);
+    const earthGroup=new THREE.Group();scene.add(earthGroup);const R=2;
+    const sphere=new THREE.Mesh(new THREE.SphereGeometry(R,96,64),new THREE.MeshPhongMaterial({color:0x27473c,specular:0x25352e,shininess:9}));earthGroup.add(sphere);
+    const textureLoader=new THREE.TextureLoader();textureLoader.setCrossOrigin('anonymous');
 
-    const controls = new OrbitControls(camera, canvas); controls.enableDamping = true; controls.dampingFactor = 0.045; controls.enablePan = false; controls.minDistance = 3.2; controls.maxDistance = 14; controls.autoRotate = true; controls.autoRotateSpeed = 0.7;
-
-    const ambient = new THREE.AmbientLight(0xb7d5c6, 1.15); scene.add(ambient);
-    const sun = new THREE.DirectionalLight(0xcfe4d6, 2.8); sun.position.set(-4,2,5); scene.add(sun);
-
-    const earthGroup = new THREE.Group(); scene.add(earthGroup);
-    const earthRadius = 2.2;
-    const earth = new THREE.Mesh(new THREE.SphereGeometry(earthRadius, 96, 64), new THREE.MeshPhongMaterial({ color: 0x335f4e, shininess: 8, specular: 0x1a2d28 })); earthGroup.add(earth);
-    const surfaceGlow = new THREE.Mesh(new THREE.SphereGeometry(earthRadius * 1.015, 96, 64), new THREE.MeshBasicMaterial({ color: 0x2db2c1, transparent: true, opacity: 0.18, depthWrite: false })); earthGroup.add(surfaceGlow);
-    const atmosphereShell = new THREE.Mesh(new THREE.SphereGeometry(earthRadius * 1.05, 64, 48), new THREE.MeshBasicMaterial({ color: 0x4eaec0, transparent: true, opacity: 0.12, side: THREE.BackSide })); earthGroup.add(atmosphereShell);
-
-    const textureLoader = new THREE.TextureLoader(); textureLoader.setCrossOrigin('anonymous');
-    textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg', texture => { texture.colorSpace = THREE.SRGBColorSpace; earth.material.map = texture; earth.material.needsUpdate = true; }, undefined, () => console.warn('Earth texture failed; using fallback globe color.'));
-
-    const starsGeo = new THREE.BufferGeometry(); const stars = []; for (let i = 0; i < 1800; i++) { const radius = THREE.MathUtils.randFloat(12, 34); const theta = Math.random() * Math.PI * 2; const phi = Math.acos(THREE.MathUtils.randFloatSpread(2)); stars.push(radius * Math.sin(phi) * Math.cos(theta), radius * Math.cos(phi), radius * Math.sin(phi) * Math.sin(theta)); } starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(stars, 3)); const starfield = new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0xdfe8e0, size: 0.05, transparent: true, opacity: 0.8 })); scene.add(starfield);
-
-    function latLonToVector(lat, lon, radius = earthRadius + 0.06) {
-      const phi = (90 - lat) * (Math.PI / 180);
-      const theta = (lon + 180) * (Math.PI / 180);
-      const x = -(radius * Math.sin(phi) * Math.cos(theta));
-      const z = radius * Math.sin(phi) * Math.sin(theta);
-      const y = radius * Math.cos(phi);
-      return new THREE.Vector3(x, y, z);
+    function requestRender() {
+      renderRequested = true;
     }
 
-    const aircraftGroup = new THREE.Group(); const solarGroup = new THREE.Group(); earthGroup.add(aircraftGroup, solarGroup);
-    const activeKinds = new Set(['air', 'solar', 'surface']);
+    let renderRequested = true;
 
-    function makeMarker(color, size = 0.04) {
-      return new THREE.Mesh(new THREE.SphereGeometry(size, 12, 12), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.92 }));
+    textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',texture=>{
+      texture.colorSpace=THREE.SRGBColorSpace;
+      // Match the longitude convention used by xyz() and the shifted data rasters.
+      texture.wrapS=THREE.RepeatWrapping;
+      texture.offset.x=0.25;
+      sphere.material.map=texture;
+      sphere.material.color.set(0xffffff);
+      sphere.material.needsUpdate=true;
+      renderFlatMap();
+      requestRender();
+    },undefined,()=>{showToast('Earth texture unavailable · using globe fallback'); renderFlatMap(); requestRender();});
+
+    const temperatureMaterial=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.82,depthWrite:false});
+    const temperatureOverlay=new THREE.Mesh(new THREE.SphereGeometry(R*1.006,96,64),temperatureMaterial);temperatureOverlay.visible=false;earthGroup.add(temperatureOverlay);
+    const radiationMaterial=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.84,depthWrite:false});
+    const radiationOverlay=new THREE.Mesh(new THREE.SphereGeometry(R*1.009,96,64),radiationMaterial);radiationOverlay.visible=false;earthGroup.add(radiationOverlay);
+    const waterMaterial=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.84,depthWrite:false});
+    const waterOverlay=new THREE.Mesh(new THREE.SphereGeometry(R*1.012,96,64),waterMaterial);waterOverlay.visible=false;earthGroup.add(waterOverlay);
+    const soilMaterial=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.84,depthWrite:false});
+    const soilOverlay=new THREE.Mesh(new THREE.SphereGeometry(R*1.015,96,64),soilMaterial);soilOverlay.visible=false;earthGroup.add(soilOverlay);
+    const atmosphereDataMaterial=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.84,depthWrite:false});
+    const atmosphereDataOverlay=new THREE.Mesh(new THREE.SphereGeometry(R*1.018,96,64),atmosphereDataMaterial);atmosphereDataOverlay.visible=false;earthGroup.add(atmosphereDataOverlay);
+    const atmosphere=new THREE.Mesh(new THREE.SphereGeometry(R*1.025,64,48),new THREE.MeshBasicMaterial({color:0x42a8a0,transparent:true,opacity:.07,side:THREE.BackSide}));earthGroup.add(atmosphere);
+    const starsGeo=new THREE.BufferGeometry(),stars=[];for(let i=0;i<1800;i++){const r=THREE.MathUtils.randFloat(12,38),theta=Math.random()*Math.PI*2,phi=Math.acos(THREE.MathUtils.randFloatSpread(2));stars.push(r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta))}starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(stars,3));const starfield=new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xb3d3c0,size:.035,transparent:true,opacity:.72}));scene.add(starfield);
+
+    function xyz(lat,lon,altKm=0){const la=THREE.MathUtils.degToRad(lat),lo=THREE.MathUtils.degToRad(lon),r=R*(1+altKm/6371);return new THREE.Vector3(r*Math.cos(la)*Math.sin(lo),r*Math.sin(la),r*Math.cos(la)*Math.cos(lo))}
+    earthGroup.quaternion.setFromUnitVectors(xyz(38,-97).normalize(),new THREE.Vector3(0,0,1));
+    const pickables=[];
+    const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let selected=null;
+    const detailPanel=document.querySelector('#detailPanel');
+    function select(item){selected=item;const live=Boolean(item.source);detailPanel.innerHTML=`<div class="detail-card"><div class="detail-head"><div class="detail-icon" style="color:#${item.color.toString(16).padStart(6,'0')}">✦</div><div><b>${item.name}</b><small>${item.detail||item.source}</small></div></div><div class="feed-status"><i style="background:${live?'var(--mint)':'var(--amber)'}"></i> ${live?`${item.source.toUpperCase()} · LIVE PUBLIC DATA`:'DEMONSTRATION OBJECT · NOT LIVE'}</div><div class="data-grid"><div class="datum"><small>LATITUDE</small><b>${item.lat.toFixed(3)}°</b></div><div class="datum"><small>LONGITUDE</small><b>${item.lon.toFixed(3)}°</b></div><div class="datum"><small>ALTITUDE</small><b>${item.alt.toFixed(1)} km</b></div><div class="datum"><small>SPEED</small><b>${item.speed||'—'}</b></div>${item.timestamp?`<div class="datum"><small>UPDATED</small><b>${new Date(item.timestamp).toISOString().slice(11,19)} UTC</b></div>`:''}</div></div>`}
+    const mapTooltip=document.querySelector('#mapTooltip');
+    function escapeMarkup(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+    let pixelSampleRequest=0, lastInspection=null;
+    const sampleCache=new Map();
+    let runningSamples=0;
+    const sampleQueue=[];
+    async function sampleMeasurement(item,latitude,longitude){
+      const params=new URLSearchParams({lat:String(latitude),lon:String(longitude)});
+      for(const [key,value] of Object.entries(item))if(value!==undefined)params.set(key,value);
+      const endpoint=item.layer==='temperature'?'/api/v1/temperature/sample':'/api/v1/environment/sample';
+      const url=`${endpoint}?${params}`;
+      if(sampleCache.has(url))return sampleCache.get(url);
+      const job=(async()=>{
+        if(runningSamples>=3)await new Promise(resolve=>sampleQueue.push(resolve));
+        runningSamples++;
+        try{
+          const response=await fetch(url),data=await response.json();
+          if(!response.ok)throw new Error(data.message||data.error||`API returned ${response.status}`);
+          return {...item,...data};
+        }finally{runningSamples--;sampleQueue.shift()?.()}
+      })();
+      sampleCache.set(url,job);
+      if(sampleCache.size>500)sampleCache.delete(sampleCache.keys().next().value);
+      job.catch(()=>sampleCache.delete(url));
+      return job;
     }
-
-    function setVisible(kind, visible) {
-      const group = kind === 'air' ? aircraftGroup : solarGroup;
-      group.visible = visible;
-      if (kind === 'surface') surfaceGlow.visible = visible;
-      const toggles = document.querySelectorAll('[data-kind]');
-      for (const input of toggles) if (input.dataset.kind === kind) input.closest('.domain').classList.toggle('active', input.checked);
+    function sampleMarkup(result){
+      const coordinate=value=>Number.isFinite(value)?value.toFixed(3)+'°':'Unavailable';
+      const source=result.source||({temperature:'MODIS/Terra MOD21C2',radiation:'CERES',water:'SMAP L3 Enhanced',soil:'AMSR2 LPRM',atmosphere:'MERRA-2 climate indices'}[result.layer]||result.layer||'');
+      const value=result.value===null||!Number.isFinite(result.value)?'No valid observation':`${Number(result.value).toLocaleString(undefined,{maximumFractionDigits:4})} ${escapeMarkup(result.units)}`;
+      return `<div class="datum"><small>${escapeMarkup(source)}</small><small>${escapeMarkup(result.label||result.variable||result.view)} · ${escapeMarkup(result.period||result.date||'')} ${escapeMarkup(result.view||result.pass||'')}</small><b>${value}</b><small>${escapeMarkup(result.sampleMethod||'Nearest source grid cell')} · ${coordinate(result.latitude)}, ${coordinate(result.longitude)}${result.gridResolution?' · '+escapeMarkup(result.gridResolution):''}</small>${result.masked?'<small>Missing or quality-filtered source value; this is not zero.</small>':''}</div>`;
     }
-
-    document.querySelectorAll('[data-kind]').forEach(input => {
-      input.addEventListener('change', () => {
-        const kind = input.dataset.kind;
-        const visible = input.checked;
-        if (kind === 'surface') surfaceGlow.visible = visible;
-        if (kind === 'air') aircraftGroup.visible = visible;
-        if (kind === 'solar') solarGroup.visible = visible;
-        setVisible(kind, visible);
-      });
-    });
-
-    const tooltip = document.getElementById('toast');
-    function showToast(text) { tooltip.textContent = text; tooltip.classList.add('show'); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => tooltip.classList.remove('show'), 2500); }
-    const searchNote = document.getElementById('searchNote');
-    document.getElementById('searchForm').addEventListener('submit', event => {
-      event.preventDefault();
-      const q = document.getElementById('searchInput').value.trim();
-      const match = q.match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
-      if (!match) { searchNote.textContent = 'Use: latitude, longitude'; return; }
-      const lat = Number(match[1]);
-      const lon = Number(match[2]);
-      if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) { searchNote.textContent = 'Coordinates out of range.'; return; }
-      const target = latLonToVector(lat, lon, 7.8).normalize(); camera.position.copy(target.multiplyScalar(8.8)); controls.target.set(0,0,0); controls.update(); searchNote.textContent = `Centered on ${lat.toFixed(2)}, ${lon.toFixed(2)}`; }
-    );
-
-    async function fetchJson(url) {
-      const res = await fetch(url); if (!res.ok) throw new Error(`${url} => ${res.status}`); return res.json();
+    function inspectionGroups(){
+      const groups=[];
+      if(temperaturePeriod.value&&!temperaturePeriod.disabled)groups.push({name:'Land temperature · MODIS',base:{layer:'temperature',period:temperaturePeriod.value,view:temperatureView.value},variants:['day','night'].filter(view=>temperaturePeriods.find(p=>p.key===temperaturePeriod.value)?.[view]).map(view=>({view}))});
+      for(const [layer,name,date,variable,data,extra] of [
+        ['radiation','Radiation & energy · CERES',radiationDate.value,radiationVariable.value,radiationData?.[radiationCadence.value],{cadence:radiationCadence.value,hour:radiationHour.value}],
+        ['water','Soil water · SMAP',waterDate.value,waterVariable.value,waterData,{pass:waterPass.value}],
+        ['soil','Soil properties · '+(soilData?.source||'satellite'),soilDate.value,soilVariable.value,soilData,{}],
+        ['atmosphere','Climate indices · MERRA-2',atmosphereDate.value,atmosphereVariable.value,atmosphereData,{}]
+      ])if(data&&date){
+        const variants=Object.keys(data.variables||{}).flatMap(variable=>layer==='water'?['am','pm'].map(pass=>({variable,pass})):[{variable}]);
+        groups.push({name,base:{layer,date,variable,...extra},variants});
+      }
+      return groups;
     }
-
-    async function loadAirData() {
-      try {
-        const data = await fetchJson('/api/v1/entities?kind=air&limit=150&minAltitude=0&maxAltitude=600');
-        aircraftGroup.clear();
-        (data.entities || []).forEach(entity => {
-          const dot = makeMarker(0x69c9ff, 0.035); dot.position.copy(latLonToVector(entity.latitude, entity.longitude, earthRadius + 0.1)); dot.userData = { label: entity.name || 'Aircraft', detail: `${entity.country || 'Unknown'} • ${entity.speedKmh ? `${entity.speedKmh} km/h` : 'speed unknown'} • ${entity.altitudeKm ? `${entity.altitudeKm.toFixed(1)} km` : 'alt unknown'}` };
-          aircraftGroup.add(dot);
+    async function inspectMapPixel(latitude,longitude,place=null){
+      lastInspection={latitude,longitude,place};
+      if(document.querySelector('#intersectionEnabled').checked)evaluateCandidate(latitude,longitude,place);
+      const request=++pixelSampleRequest;
+      detailPanel.closest('aside').classList.add('has-selection');
+      if(place)showNasaBase(place);
+      else detailPanel.innerHTML=`<div class="detail-card"><b>Map reading</b><p class="feed-copy">${latitude.toFixed(3)}°, ${longitude.toFixed(3)}°</p></div>`;
+      const close=document.createElement('button');close.className='close-reading';close.textContent='Close details';close.onclick=()=>detailPanel.closest('aside').classList.remove('has-selection');detailPanel.prepend(close);if(place?.matchedLayer){const reference=document.createElement('p');reference.className='feed-copy';reference.textContent='PDF reference magnitude: '+place.referenceMagnitude+'. Source: matched magnitude.pdf. Date and matching method unspecified; values below are independently sampled for your selected dates. The atmosphere index is unspecified; the soil-water unit is reproduced as supplied.';detailPanel.append(reference)}
+      if(place?.source&&/^https?:\/\//.test(place.source)){const link=document.createElement('a');link.href=place.source;link.textContent='Site reference';link.target='_blank';link.rel='noopener noreferrer';detailPanel.append(link)}
+      const intro=document.createElement('p');intro.className='feed-copy';intro.textContent='Readings use the dates selected on the left, independently of visible map overlays. Dates differ between datasets. Expand a dataset to load every available parameter. Site parameter tags describe research themes, not measured values.';detailPanel.append(intro);
+      const groups=inspectionGroups();
+      if(!groups.length){intro.textContent='Dataset availability is still loading. Select this location again once dates appear.';return}
+      await Promise.all(groups.map(async group=>{
+        const section=document.createElement('section');section.className='reading-group';
+        const heading=document.createElement('h3');heading.textContent=group.name;section.append(heading);if(group.base.layer==='temperature'){const note=document.createElement('p');note.className='feed-copy';note.textContent='MODIS measures land-surface temperature averaged over eight days on a 0.05° grid. It is not current air temperature. Missing or rejected pixels are left blank.';section.append(note)}if(group.base.layer==='atmosphere'){const note=document.createElement('p');note.className='feed-copy';note.textContent='Earth atmosphere. This dataset supplies monthly climate indices; it does not measure local gas composition or pressure.';section.append(note)}
+        const main=document.createElement('div');main.className='data-grid';main.textContent='Loading selected measurement…';section.append(main);
+        const details=document.createElement('details'),summary=document.createElement('summary'),more=document.createElement('div');more.className='data-grid';summary.textContent=`All ${group.variants.length} parameters / observations`;details.append(summary,more);section.append(details);detailPanel.append(section);
+        const render=async(item,target)=>{try{const value=await sampleMeasurement(item,latitude,longitude);if(request===pixelSampleRequest)target.innerHTML=sampleMarkup(value)}catch(error){if(request===pixelSampleRequest){target.textContent=`${item.variable||item.view}: unavailable — ${error.message}`;target.classList.add('feed-copy')}}};
+        details.addEventListener('toggle',()=>{
+          if(!details.open||details.dataset.loaded||request!==pixelSampleRequest)return;
+          details.dataset.loaded='true';
+          for(const variant of group.variants){const row=document.createElement('div');row.className='datum';row.textContent=`Loading ${variant.variable||variant.view}…`;more.append(row);render({...group.base,...variant},row)}
         });
-        document.getElementById('visibleCount').textContent = String(Math.min((data.entities || []).length, 99)).padStart(2, '0');
-      } catch (error) {
-        console.warn(error);
-        aircraftGroup.clear();
-        showToast('Aircraft data unavailable');
+        await render(group.base,main);
+      }));
+    }
+    function refreshInspection(){if(lastInspection){const {latitude,longitude,place}=lastInspection;inspectMapPixel(latitude,longitude,place)}}
+    function showNasaBase(base){selectedBaseId=base.id;renderFlatMap();const targets=(base.target||[]).map(value=>`<li>${escapeMarkup(value)}</li>`).join(''),parameters=(base.parameters||[]).map(value=>`<span class="site-tag">${escapeMarkup(value)}</span>`).join(''),roles=(base.roles||[]).map(role=>`<li>${escapeMarkup(role)}</li>`).join(''),location=base.locationLabel||[base.city,base.state,base.country].filter(Boolean).join(', '),precision=base.coordinatePrecision&&base.coordinatePrecision!=='site'?`Approximate ${base.coordinatePrecision}-level marker position`:'Site coordinates';detailPanel.innerHTML=`<div class="detail-card"><div class="detail-head"><div class="detail-icon" style="color:${base.siteType==='analog'?'#62d6c4':'#ffd166'}">✦</div><div><b>${escapeMarkup(base.name)}${base.acronym?` (${escapeMarkup(base.acronym)})`:''}</b><small>${escapeMarkup(location)}</small></div></div><div class="feed-status"><i style="background:${base.siteType==='analog'?'#62d6c4':'#ffd166'}"></i> ${base.matchedLayer?'SUPPLIED MATCHING COORDINATE':base.siteType==='analog'?'EARTH ANALOG SITE':'NASA MOON / MARS CENTER'}</div><p class="feed-copy"><b>Mission focus</b><br>${escapeMarkup(base.focus)}</p>${targets?`<div class="feed-copy"><b>Target</b><ul>${targets}</ul></div>`:''}${parameters?`<div class="feed-copy"><b>Parameters</b><div class="site-tags">${parameters}</div></div>`:''}${roles?`<div class="feed-copy"><b>Moon / Mars roles</b><ul>${roles}</ul></div>`:''}<div class="data-grid"><div class="datum"><small>LATITUDE</small><b>${Number(base.latitude).toFixed(3)}°</b></div><div class="datum"><small>LONGITUDE</small><b>${Number(base.longitude).toFixed(3)}°</b></div><div class="datum"><small>POSITION</small><b>${escapeMarkup(precision)}</b></div></div><p class="feed-copy">Select environmental layers to inspect Earth observations at this location.</p></div>`}
+    function addLocationMarkers(locations,kind,collection,color){for(const site of locations){color=site.matchedLayer?0x79f5ff:missionColor(site);site.siteType=site.matchedLayer?'reference':kind==='earth-analogs'?'analog':'nasa';const group=new THREE.Group();group.position.copy(xyz(site.latitude,site.longitude,300));const glow=new THREE.Mesh(new THREE.SphereGeometry(.07,14,10),new THREE.MeshBasicMaterial({color,transparent:true,opacity:isHabitat(site)?.38:.07,depthWrite:false}));const core=new THREE.Mesh(new THREE.SphereGeometry(.036,14,10),new THREE.MeshBasicMaterial({color,transparent:true,opacity:site.matchedLayer?1:isHabitat(site)?1:.4,depthWrite:false}));group.add(glow,core);group.userData={site,kind};core.userData={location:{site,kind}};earthGroup.add(group);collection.push(group);pickables.push(core)}}
+    async function loadNasaBases(){try{const response=await fetch('/api/v1/locations/nasa');if(!response.ok)throw new Error(`API returned ${response.status}`);const data=await response.json();nasaLocations=data.locations||[];addLocationMarkers(nasaLocations,'nasa-bases',nasaBaseObjects,0xffd166);updateVisibility()}catch(error){console.info('NASA center locations unavailable:',error.message)}}
+    function focusLocation(site){const kind=site.siteType==='analog'?'earth-analogs':'nasa-bases';activeKinds.add(kind);const input=document.querySelector(`[data-kind="${kind}"]`);input.checked=true;input.closest('.domain')?.classList.add('active');updateVisibility();earthGroup.quaternion.setFromUnitVectors(xyz(site.latitude,site.longitude).normalize(),new THREE.Vector3(0,0,1));controls.target.set(0,0,0);controls.update();inspectMapPixel(site.latitude,site.longitude,site);showToast(`Centered on ${site.acronym||site.name}`);requestRender();}
+    function renderAnalogDirectory(){const directory=document.querySelector('#analogDirectory');directory.replaceChildren();document.querySelector('#analogCount').textContent=`${analogLocations.length} SITES`;for(const site of [...nasaLocations,...analogLocations].filter(missionMatches)){const button=document.createElement('button');button.type='button';button.className='analog-card';button.setAttribute('aria-label',`Open ${site.name} details`);const name=document.createElement('b'),location=document.createElement('small'),tags=document.createElement('div');name.textContent=`${site.acronym} · ${site.name}`;location.textContent=site.locationLabel||[site.city,site.state,site.country].filter(Boolean).join(', ');tags.className='site-tags';for(const tag of [...(site.target||[]),...(site.parameters||[])]){const chip=document.createElement('span');chip.className='site-tag';chip.textContent=tag;tags.append(chip)}button.append(name,location,tags);button.addEventListener('click',()=>focusLocation(site));directory.append(button)}}
+    async function loadAnalogBases(){try{const response=await fetch('/api/v1/locations/analogs');if(!response.ok)throw new Error(`API returned ${response.status}`);const data=await response.json();analogLocations=data.locations||[];addLocationMarkers(analogLocations,'earth-analogs',analogBaseObjects,0x62d6c4);renderAnalogDirectory();updateVisibility()}catch(error){document.querySelector('#analogDirectory').textContent='Analog site data could not be loaded.';console.info('Earth analog locations unavailable:',error.message)}}
+    const liveMaterial=new THREE.MeshBasicMaterial({color:0x69c9ff});const liveMesh=new THREE.InstancedMesh(new THREE.SphereGeometry(.026,9,7),liveMaterial,500);liveMesh.count=0;liveMesh.visible=false;earthGroup.add(liveMesh);let liveEntitiesAll=[],liveEntityByInstance=[];
+    canvas.addEventListener('pointermove',event=>{const rect=canvas.getBoundingClientRect();pointer.x=((event.clientX-rect.left)/rect.width)*2-1;pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObjects([...pickables.filter(core=>activeKinds.has(core.userData.location.kind)&&missionMatches(core.userData.location.site)),sphere],false)[0],location=hit?.object.userData.location;if(!location||!activeKinds.has(location.kind)){mapTooltip.style.display='none';canvas.style.cursor='';return}const site=location.site;mapTooltip.replaceChildren();const title=document.createElement('b'),focus=document.createElement('span');title.textContent=`${site.name}${site.acronym?` (${site.acronym})`:''}`;focus.textContent=site.focus;mapTooltip.append(title,focus);mapTooltip.style.left=`${Math.min(event.clientX-rect.left+14,rect.width-250)}px`;mapTooltip.style.top=`${Math.max(8,event.clientY-rect.top-12)}px`;mapTooltip.style.display='block';canvas.style.cursor='pointer';requestRender();});canvas.addEventListener('pointerleave',()=>{mapTooltip.style.display='none';canvas.style.cursor='';});
+    canvas.addEventListener('pointerdown', requestRender);
+    canvas.addEventListener('pointermove', requestRender);
+    canvas.addEventListener('wheel', requestRender, { passive: true });
+    canvas.addEventListener('touchstart', requestRender, { passive: true });
+    canvas.addEventListener('touchmove', requestRender, { passive: true });
+
+    canvas.addEventListener('click',event=>{const rect=canvas.getBoundingClientRect();pointer.x=((event.clientX-rect.left)/rect.width)*2-1;pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObjects([...pickables.filter(core=>activeKinds.has(core.userData.location.kind)&&missionMatches(core.userData.location.site)),liveMesh,sphere],false)[0];if(!hit||hit.object===sphere){const surface=hit?.object===sphere?hit:raycaster.intersectObject(sphere,false)[0];if(surface){const local=earthGroup.worldToLocal(surface.point.clone()),latitude=THREE.MathUtils.radToDeg(Math.asin(THREE.MathUtils.clamp(local.y/R,-1,1))),longitude=THREE.MathUtils.radToDeg(Math.atan2(local.x,local.z));inspectMapPixel(latitude,longitude)}return}if(hit.object===liveMesh){const item=liveEntityByInstance[hit.instanceId];if(item)select(item)}else{const location=hit.object.userData.location;if(location&&activeKinds.has(location.kind))inspectMapPixel(location.site.latitude,location.site.longitude,location.site)}});
+
+    function flatCoordinate(clientX,clientY){const rect=flatMap.getBoundingClientRect(),x=clientX-rect.left,y=clientY-rect.top;if(!mapBounds.width||x<mapBounds.x||x>mapBounds.x+mapBounds.width||y<mapBounds.y||y>mapBounds.y+mapBounds.height)return null;return {latitude:90-(y-mapBounds.y)/mapBounds.height*180,longitude:(x-mapBounds.x)/mapBounds.width*360-180,x,y,rect}}
+    function nearestFlatLocation(point){if(!point)return null;const sites=[...matchedPoints.filter(site=>activeKinds.has(site.matchedLayer)).map(site=>({site,kind:site.matchedLayer})),...(activeKinds.has('nasa-bases')?nasaLocations:[]).map(site=>({site,kind:'nasa-bases'})),...(activeKinds.has('earth-analogs')?analogLocations:[]).map(site=>({site,kind:'earth-analogs'}))];return sites.map(item=>({...item,x:mapBounds.x+(item.site.longitude+180)/360*mapBounds.width,y:mapBounds.y+(90-item.site.latitude)/180*mapBounds.height})).map(item=>({...item,distance:Math.hypot(item.x-point.x,item.y-point.y)})).filter(item=>item.distance<12).sort((a,b)=>a.distance-b.distance)[0]||null}
+    flatMap.addEventListener('pointermove',event=>{const point=flatCoordinate(event.clientX,event.clientY),nearby=nearestFlatLocation(point);if(!nearby){mapTooltip.style.display='none';flatMap.style.cursor=point?'crosshair':'';return}const site=nearby.site;mapTooltip.replaceChildren();const title=document.createElement('b'),focus=document.createElement('span');title.textContent=`${site.name}${site.acronym?` (${site.acronym})`:''}`;focus.textContent=site.focus;mapTooltip.append(title,focus);mapTooltip.style.left=`${Math.min(point.x+14,point.rect.width-250)}px`;mapTooltip.style.top=`${Math.max(8,point.y-12)}px`;mapTooltip.style.display='block';flatMap.style.cursor='pointer'});flatMap.addEventListener('pointerleave',()=>{mapTooltip.style.display='none';flatMap.style.cursor=''})
+    flatMap.addEventListener('click',event=>{const point=flatCoordinate(event.clientX,event.clientY);if(!point)return;const nearby=nearestFlatLocation(point);if(nearby){inspectMapPixel(nearby.site.latitude,nearby.site.longitude,nearby.site);return}inspectMapPixel(point.latitude,point.longitude)})
+
+    const matchedPoints=[{"id": "matched-temperature", "name": "Surface temperature reference point", "latitude": -15.157, "longitude": -51.81, "matchedLayer": "temperature", "referenceMagnitude": "58.3 °C", "sourceDocument": "matched magnitude.pdf", "target": ["Moon", "Mars"], "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.", "parameters": ["Surface temperature"], "coordinatePrecision": "supplied coordinate", "facilityType": "reference_point"}, {"id": "matched-radiation", "name": "Net radiation reference point", "latitude": 4.338, "longitude": -46.933, "matchedLayer": "radiation", "referenceMagnitude": "298.9 W/m²", "sourceDocument": "matched magnitude.pdf", "target": ["Moon", "Mars"], "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.", "parameters": ["Net radiation"], "coordinatePrecision": "supplied coordinate", "facilityType": "reference_point"}, {"id": "matched-water", "name": "Soil water (SWAP in source) reference point", "latitude": 13.924, "longitude": 29.038, "matchedLayer": "water", "referenceMagnitude": "0.02 cm³ (unit as supplied)", "sourceDocument": "matched magnitude.pdf", "target": ["Moon", "Mars"], "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.", "parameters": ["Soil water (SWAP in source)"], "coordinatePrecision": "supplied coordinate", "facilityType": "reference_point"}, {"id": "matched-soil", "name": "Soil moisture reference point", "latitude": -23.672, "longitude": 140.768, "matchedLayer": "soil", "referenceMagnitude": "~0%", "sourceDocument": "matched magnitude.pdf", "target": ["Moon", "Mars"], "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.", "parameters": ["Soil moisture"], "coordinatePrecision": "supplied coordinate", "facilityType": "reference_point"}, {"id": "matched-atmosphere", "name": "Atmosphere reference point", "latitude": 73.576, "longitude": 39.507, "matchedLayer": "atmosphere", "referenceMagnitude": "3.68 mm/day", "sourceDocument": "matched magnitude.pdf", "target": ["Moon", "Mars"], "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.", "parameters": ["Atmosphere"], "coordinatePrecision": "supplied coordinate", "facilityType": "reference_point"}];
+    const matchedPointObjects=[];
+    const nasaBaseObjects=[],analogBaseObjects=[];let nasaLocations=[],analogLocations=[];const activeKinds=new Set(['nasa-bases','earth-analogs']);
+    function isHabitat(site){return site.facilityType==='habitat_or_station'}
+    function missionColor(site){const text=[...(site.target||[]),...(site.roles||[]),site.focus||''].join(' ').toLowerCase();const moon=/moon|lunar|artemis|apollo/.test(text),mars=/mars|martian/.test(text);return moon&&mars?0xc3a0f4:moon?0x85bce5:mars?0xdf806b:0x9aaca1}
+    const candidateMatches=new Set();let candidateGeneration=0;
+    const candidatePoint=new THREE.Mesh(new THREE.SphereGeometry(.055,16,12),new THREE.MeshBasicMaterial({color:0xfff16a}));candidatePoint.visible=false;earthGroup.add(candidatePoint);let candidatePointMatches=false;
+    function siteColor(site){if(site.matchedLayer)return 0x79f5ff;return document.querySelector('#intersectionEnabled').checked&&candidateMatches.has(site.id)?0xfff16a:missionColor(site)}
+    function refreshSiteColors(){candidatePoint.visible=candidatePointMatches&&document.querySelector('#intersectionEnabled').checked;for(const marker of [...nasaBaseObjects,...analogBaseObjects])for(const child of marker.children)child.material.color.setHex(siteColor(marker.userData.site));renderFlatMap();requestRender()}
+    async function evaluateCandidate(latitude,longitude,site){
+      const generation=candidateGeneration,maximum=Number(document.querySelector('#candidateTemp').value),moisture=Number(document.querySelector('#candidateWater').value);
+      const status=document.querySelector('#candidateStatus');
+      if(!Number.isFinite(maximum)||!Number.isFinite(moisture)||moisture<0||moisture>1){status.textContent='Enter valid thresholds; soil water must be between 0 and 1.';return}
+      if(!temperaturePeriod.value||!waterDate.value){status.textContent='Wait for temperature and water dates to load.';return}
+      try{const [temperature,water]=await Promise.all([sampleMeasurement({layer:'temperature',period:temperaturePeriod.value,view:temperatureView.value},latitude,longitude),sampleMeasurement({layer:'water',date:waterDate.value,variable:'soil-moisture',pass:waterPass.value},latitude,longitude)]);
+        if(generation!==candidateGeneration)return;
+        const available=Number.isFinite(temperature.value)&&Number.isFinite(water.value),match=available&&temperature.value<=maximum&&water.value<=moisture;
+        if(!site){candidatePointMatches=match;candidatePoint.position.copy(xyz(latitude,longitude,300))}
+        if(site&&match)candidateMatches.add(site.id);else if(site)candidateMatches.delete(site.id);
+        status.textContent=`${site?.name||latitude.toFixed(3)+', '+longitude.toFixed(3)}: ${!available?'insufficient valid observations':match?'2 of 2 conditions met':'does not meet both conditions'}. Temperature ${temperature.value??'missing'} °C (${temperaturePeriod.value}); soil water ${water.value??'missing'} (${waterDate.value}).`;
+        refreshSiteColors();return match;
+      }catch(error){if(generation===candidateGeneration)status.textContent='Candidate check unavailable: '+error.message;return false}
+    }
+    document.querySelector('#intersectionEnabled').addEventListener('change',refreshSiteColors);
+    for(const id of ['candidateTemp','candidateWater','temperaturePeriod','temperatureView','waterDate','waterPass'])document.getElementById(id).addEventListener('change',()=>{candidateGeneration++;candidateMatches.clear();candidatePointMatches=false;refreshSiteColors();document.querySelector('#candidateStatus').textContent='Settings changed. Scan again to update matches.'});
+    document.querySelector('#scanCandidates').addEventListener('click',async event=>{const button=event.currentTarget;button.disabled=true;document.querySelector('#intersectionEnabled').checked=true;const generation=++candidateGeneration;candidateMatches.clear();let evaluated=0;const sites=[...nasaLocations,...analogLocations].filter(missionMatches);try{for(const site of sites){if(generation!==candidateGeneration)break;await evaluateCandidate(site.latitude,site.longitude,site);evaluated++}if(generation===candidateGeneration)document.querySelector('#candidateStatus').textContent=`${candidateMatches.size} matches among ${evaluated} sites evaluated. Missing readings excluded. Click a site for source values.`}finally{button.disabled=false;refreshSiteColors()}});
+    function missionMatches(site){if(site.matchedLayer)return activeKinds.has(site.matchedLayer);const target=document.querySelector('#missionTarget').value;if(target==='all')return true;const text=[...(site.target||[]),...(site.roles||[]),site.focus||''].join(' ').toLowerCase();const moon=/moon|lunar|artemis|apollo/.test(text),mars=/mars|martian/.test(text);return target==='both'?moon&&mars:target==='moon'?moon:mars}
+    document.querySelector('#missionTarget').addEventListener('change',()=>{updateVisibility();renderAnalogDirectory()});
+    function drawMapTexture(image,alpha){if(!image)return;const imageWidth=image.naturalWidth||image.width,imageHeight=image.naturalHeight||image.height;if(!imageWidth||!imageHeight)return;const shift=Math.floor(imageWidth/4),split=mapBounds.width*shift/imageWidth;flatContext.globalAlpha=alpha;flatContext.drawImage(image,0,0,imageWidth-shift,imageHeight,mapBounds.x+split,mapBounds.y,mapBounds.width-split,mapBounds.height);flatContext.drawImage(image,imageWidth-shift,0,shift,imageHeight,mapBounds.x,mapBounds.y,split,mapBounds.height);flatContext.globalAlpha=1}
+    let mapBounds={x:0,y:0,width:0,height:0};
+    function drawLocationDots(sites,color){for(const site of sites.filter(missionMatches)){const x=mapBounds.x+(site.longitude+180)/360*mapBounds.width,y=mapBounds.y+(90-site.latitude)/180*mapBounds.height;flatContext.beginPath();flatContext.fillStyle='#'+siteColor(site).toString(16).padStart(6,'0');flatContext.shadowColor=flatContext.fillStyle;flatContext.globalAlpha=site.matchedLayer?1:isHabitat(site)?1:.4;flatContext.shadowBlur=isHabitat(site)?12:0;flatContext.arc(x,y,isHabitat(site)?5:3.5,0,Math.PI*2);flatContext.fill();flatContext.globalAlpha=1;flatContext.shadowBlur=0;if(site.id===selectedBaseId){flatContext.beginPath();flatContext.strokeStyle='#fff0b5';flatContext.lineWidth=1.5;flatContext.arc(x,y,8,0,Math.PI*2);flatContext.stroke()}}}
+    function renderFlatMap(){if(!flatContext||!flatMap.width||!flatMap.height)return;const width=flatMap.clientWidth,height=flatMap.clientHeight,dpr=Math.min(devicePixelRatio||1,2);flatContext.setTransform(dpr,0,0,dpr,0,0);flatContext.clearRect(0,0,width,height);flatContext.fillStyle='#06100d';flatContext.fillRect(0,0,width,height);const mapWidth=Math.min(width,height*2),mapHeight=mapWidth/2;mapBounds={x:(width-mapWidth)/2,y:(height-mapHeight)/2,width:mapWidth,height:mapHeight};if(sphere.material.map?.image){flatContext.globalAlpha=1;flatContext.drawImage(sphere.material.map.image,mapBounds.x,mapBounds.y,mapBounds.width,mapBounds.height)}else{flatContext.fillStyle='#0b2019';flatContext.fillRect(mapBounds.x,mapBounds.y,mapBounds.width,mapBounds.height)}flatContext.strokeStyle='#6e8b7930';flatContext.lineWidth=1;for(let lon=-150;lon<180;lon+=30){const x=mapBounds.x+(lon+180)/360*mapBounds.width;flatContext.beginPath();flatContext.moveTo(x,mapBounds.y);flatContext.lineTo(x,mapBounds.y+mapBounds.height);flatContext.stroke()}for(let lat=-60;lat<=60;lat+=30){const y=mapBounds.y+(90-lat)/180*mapBounds.height;flatContext.beginPath();flatContext.moveTo(mapBounds.x,y);flatContext.lineTo(mapBounds.x+mapBounds.width,y);flatContext.stroke()}for(const [kind,material] of [['temperature',temperatureMaterial],['radiation',radiationMaterial],['water',waterMaterial],['soil',soilMaterial],['atmosphere',atmosphereDataMaterial]])if(activeKinds.has(kind)&&material.map?.image)drawMapTexture(material.map.image,.68);if(activeKinds.has('nasa-bases'))drawLocationDots(nasaLocations,'#ffd166');if(activeKinds.has('earth-analogs'))drawLocationDots(analogLocations,'#62d6c4');drawLocationDots(matchedPoints,'#79f5ff')}
+    function setViewMode(mode){viewMode=mode==='2d'?'2d':'3d';canvas.style.display=viewMode==='3d'?'block':'none';flatMap.style.display=viewMode==='2d'?'block':'none';controls.enabled=viewMode==='3d';document.querySelector('#viewModeToggle').textContent=viewMode==='3d'?'SWITCH TO 2D MAP':'SWITCH TO 3D GLOBE';document.querySelector('#viewModeLabel').textContent=viewMode==='3d'?'3D GLOBE':'2D MAP';requestRender();if(viewMode==='2d')renderFlatMap();}
+    function updateVisibility(){for(const marker of matchedPointObjects){marker.visible=activeKinds.has(marker.userData.site.matchedLayer);for(const child of marker.children)child.visible=marker.visible}for(const marker of nasaBaseObjects){marker.visible=activeKinds.has('nasa-bases')&&missionMatches(marker.userData.site);for(const child of marker.children)child.visible=marker.visible}for(const marker of analogBaseObjects){marker.visible=activeKinds.has('earth-analogs')&&missionMatches(marker.userData.site);for(const child of marker.children)child.visible=marker.visible}temperatureOverlay.visible=activeKinds.has('temperature')&&Boolean(temperatureMaterial.map);radiationOverlay.visible=activeKinds.has('radiation')&&Boolean(radiationMaterial.map);waterOverlay.visible=activeKinds.has('water')&&Boolean(waterMaterial.map);soilOverlay.visible=activeKinds.has('soil')&&Boolean(soilMaterial.map);atmosphereDataOverlay.visible=activeKinds.has('atmosphere')&&Boolean(atmosphereDataMaterial.map);document.querySelector('#visibleCount').textContent=String([...nasaBaseObjects,...analogBaseObjects].filter(marker=>marker.visible).length).padStart(2,'0');renderFlatMap();requestRender();}
+    const temperaturePeriod=document.querySelector('#temperaturePeriod'),temperatureView=document.querySelector('#temperatureView'),temperatureStatus=document.querySelector('#temperatureStatus');let temperatureRequest=0,temperaturePeriods=[];
+    function syncTemperaturePeriods(){const view=temperatureView.value;for(const option of temperaturePeriod.options){if(!option.value)continue;const period=temperaturePeriods.find(item=>item.key===option.value);option.disabled=!period?.[view]}if(temperaturePeriod.selectedOptions[0]?.disabled){const latest=[...temperaturePeriods].reverse().find(period=>period[view]);temperaturePeriod.value=latest?.key||''}}
+    async function loadTemperaturePeriods(){try{const response=await fetch('/api/v1/temperature/periods');if(!response.ok)throw new Error(`API returned ${response.status}`);const data=await response.json();temperaturePeriods=data.periods||[];temperaturePeriod.replaceChildren();if(!temperaturePeriods.length){temperaturePeriod.add(new Option('No prepared periods',''));temperatureStatus.textContent='No temperature textures prepared yet.';return}for(const period of temperaturePeriods)temperaturePeriod.add(new Option(period.label,period.key));temperaturePeriod.disabled=false;temperaturePeriod.value=temperaturePeriods.at(-1).key;syncTemperaturePeriods();temperatureStatus.textContent=`${temperaturePeriods.length} composite periods available · MODIS/Terra`;if(temperaturePeriod.value&&activeKinds.has('temperature'))loadTemperatureTexture()}catch(error){temperaturePeriod.replaceChildren(new Option('Temperature data unavailable',''));temperatureStatus.textContent='Temperature API unavailable.';console.info('Temperature period API unavailable:',error.message)}}
+    function loadTemperatureTexture(){const period=temperaturePeriod.value,view=temperatureView.value;if(!period){temperatureOverlay.visible=false;temperatureStatus.textContent='No composite available for this view.';renderFlatMap();requestRender();return}const request=++temperatureRequest;temperatureStatus.textContent=`Loading ${view} temperature texture…`;textureLoader.load(`/api/v1/temperature/texture?period=${encodeURIComponent(period)}&view=${encodeURIComponent(view)}`,texture=>{if(request!==temperatureRequest){texture.dispose();return}texture.colorSpace=THREE.SRGBColorSpace;const previous=temperatureMaterial.map;temperatureMaterial.map=texture;temperatureMaterial.needsUpdate=true;temperatureOverlay.visible=activeKinds.has('temperature');if(previous)previous.dispose();renderFlatMap();requestRender();const option=temperaturePeriod.selectedOptions[0];temperatureStatus.textContent=`${option?.textContent||period} · ${view} · land-surface °C`;},undefined,()=>{if(request===temperatureRequest){temperatureStatus.textContent='Texture unavailable for this period/view.';temperatureOverlay.visible=false;const previous=temperatureMaterial.map;temperatureMaterial.map=null;temperatureMaterial.needsUpdate=true;if(previous)previous.dispose();renderFlatMap();requestRender();}})}
+    const radiationCadence=document.querySelector('#radiationCadence'),radiationPlatform=document.querySelector('#radiationPlatform'),radiationDate=document.querySelector('#radiationDate'),radiationHour=document.querySelector('#radiationHour'),radiationVariable=document.querySelector('#radiationVariable'),radiationStatus=document.querySelector('#radiationStatus'),radiationPlatformLabel=document.querySelector('#radiationPlatformLabel'),radiationHourLabel=document.querySelector('#radiationHourLabel');
+    const waterDate=document.querySelector('#waterDate'),waterPass=document.querySelector('#waterPass'),waterVariable=document.querySelector('#waterVariable'),waterStatus=document.querySelector('#waterStatus');
+    const soilDate=document.querySelector('#soilDate'),soilVariable=document.querySelector('#soilVariable'),soilStatus=document.querySelector('#soilStatus');
+    const atmosphereDate=document.querySelector('#atmosphereDate'),atmosphereVariable=document.querySelector('#atmosphereVariable'),atmosphereStatus=document.querySelector('#atmosphereStatus');
+    let radiationData=null,waterData=null,soilData=null,atmosphereData=null;const environmentalRequests={radiation:0,water:0,soil:0,atmosphere:0};
+    function syncRadiationDates(){if(!radiationData)return;const cadence=radiationCadence.value,previous=radiationDate.value,dates=radiationData[cadence]?.dates||[],availableVariables=Object.keys(radiationData[cadence]?.variables||{});for(const option of radiationVariable.options)option.disabled=!availableVariables.includes(option.value);if(radiationVariable.selectedOptions[0]?.disabled)radiationVariable.value=availableVariables[0]||'toa-sw';radiationPlatformLabel.hidden=true;radiationHourLabel.hidden=cadence!=='hourly';radiationDate.replaceChildren();for(const date of dates){const label=cadence==='monthly'?`${date.slice(0,4)}-${date.slice(4,6)}`:cadence==='weekly'?`Week of ${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`:`${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`;radiationDate.add(new Option(label,date))}radiationDate.disabled=!dates.length;radiationDate.value=dates.includes(previous)?previous:(cadence==='hourly'?dates.at(-1):dates[0])||'';if(cadence==='hourly'){const hours=radiationData.hourly.hoursByDate?.[radiationDate.value]||radiationData.hourly.hours||[];radiationHour.replaceChildren();for(const hour of hours)radiationHour.add(new Option(`${String(hour).padStart(2,'0')}:00 UTC`,String(hour)));radiationHour.value=String(hours.at(-1)??'')}if(radiationDate.value&&activeKinds.has('radiation'))loadRadiationTexture();else if(!dates.length)radiationStatus.textContent='No matching radiation observations in the data folder.'}
+    async function loadRadiationAvailability(){try{const response=await fetch('/api/v1/radiation/availability');if(!response.ok)throw new Error(`API returned ${response.status}`);radiationData=await response.json();syncRadiationDates();if(!radiationDate.value)radiationStatus.textContent='No radiation dates found in the data folder.'}catch(error){radiationStatus.textContent='Radiation API unavailable.';console.info('Radiation availability unavailable:',error.message)}}
+    async function updateScaleLegend(url,lowId,highId,units=''){try{const response=await fetch(`${url}${url.includes('?')?'&':'?'}meta=1`);if(!response.ok)return;const data=await response.json(),format=value=>Number(value).toLocaleString(undefined,{maximumFractionDigits:2});document.querySelector(`#${lowId}`).textContent=format(data.displayMin);document.querySelector(`#${highId}`).textContent=`${format(data.displayMax)} ${units||data.units||''}`.trim()}catch(error){console.info('Map scale metadata unavailable:',error.message)}}
+    function loadRadiationTexture(){if(!radiationData||!radiationDate.value)return;const cadence=radiationCadence.value,variable=radiationVariable.value;const params=new URLSearchParams({date:radiationDate.value,variable,cadence});if(cadence==='hourly')params.set('hour',radiationHour.value);const textureUrl=`/api/v1/radiation/texture?${params}`;const request=++environmentalRequests.radiation;radiationStatus.textContent='Preparing radiation map…';textureLoader.load(textureUrl,texture=>{if(request!==environmentalRequests.radiation){texture.dispose();return}texture.colorSpace=THREE.SRGBColorSpace;const previous=radiationMaterial.map;radiationMaterial.map=texture;radiationMaterial.needsUpdate=true;radiationOverlay.visible=activeKinds.has('radiation');if(previous)previous.dispose();renderFlatMap();requestRender();const when=cadence==='hourly'?`${radiationDate.selectedOptions[0]?.textContent} · ${radiationHour.value}:00 UTC`:cadence==='weekly'?radiationDate.selectedOptions[0]?.textContent:`${radiationDate.selectedOptions[0]?.textContent} monthly average`;radiationStatus.textContent=`${when} · ${radiationVariable.selectedOptions[0]?.textContent} · W/m² · global 1° grid`;updateScaleLegend(textureUrl,'radiationLegendLow','radiationLegendHigh');updateVisibility()},undefined,()=>{if(request===environmentalRequests.radiation){radiationStatus.textContent='Radiation map unavailable for this period.';radiationOverlay.visible=false;const previous=radiationMaterial.map;radiationMaterial.map=null;radiationMaterial.needsUpdate=true;if(previous)previous.dispose();renderFlatMap();requestRender();}})}
+    async function loadWaterAvailability(){try{const response=await fetch('/api/v1/water/dates');if(!response.ok)throw new Error(`API returned ${response.status}`);waterData=await response.json();waterDate.replaceChildren();for(const date of waterData.dates){waterDate.add(new Option(`${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`,date))}waterDate.disabled=!waterData.dates.length;if(waterData.dates.length){waterDate.value=waterData.dates[0];if(activeKinds.has('water'))loadWaterTexture()}else waterStatus.textContent='No SMAP dates found in the data folder.'}catch(error){waterStatus.textContent='Soil-moisture API unavailable.';console.info('Water availability unavailable:',error.message)}}
+    function loadWaterTexture(){if(!waterDate.value)return;const params=new URLSearchParams({date:waterDate.value,pass:waterPass.value,variable:waterVariable.value});const request=++environmentalRequests.water;waterStatus.textContent='Preparing soil-moisture texture…';textureLoader.load(`/api/v1/water/texture?${params}`,texture=>{if(request!==environmentalRequests.water){texture.dispose();return}texture.colorSpace=THREE.SRGBColorSpace;const previous=waterMaterial.map;waterMaterial.map=texture;waterMaterial.needsUpdate=true;waterOverlay.visible=activeKinds.has('water');if(previous)previous.dispose();renderFlatMap();requestRender();waterStatus.textContent=`${waterDate.selectedOptions[0]?.textContent} · ${waterPass.value.toUpperCase()} · ${waterVariable.selectedOptions[0]?.textContent} · cm³/cm³`;updateVisibility()},undefined,()=>{if(request===environmentalRequests.water){waterStatus.textContent='Soil-moisture texture unavailable.';waterOverlay.visible=false;const previous=waterMaterial.map;waterMaterial.map=null;waterMaterial.needsUpdate=true;if(previous)previous.dispose();renderFlatMap();requestRender();}})}
+    async function loadSoilAvailability(){try{const response=await fetch('/api/v1/soil/dates?product='+document.querySelector('#soilProduct').value);if(!response.ok)throw new Error(`API returned ${response.status}`);soilData=await response.json();soilVariable.replaceChildren();for(const [key,info] of Object.entries(soilData.variables))soilVariable.add(new Option(info.label,key));soilDate.replaceChildren();for(const date of soilData.dates){soilDate.add(new Option(`${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`,date))}soilDate.disabled=!soilData.dates.length;if(soilData.dates.length){soilDate.value=soilData.dates.at(-1);if(activeKinds.has('soil'))loadSoilTexture()}else soilStatus.textContent='No AMSR2 dates found in the data folder.'}catch(error){soilStatus.textContent='Satellite soil API unavailable.';console.info('Satellite soil availability unavailable:',error.message)}}
+    function syncSoilLegend(){const ranges={'skin-temperature':['−10','40 °C'],'optical-depth-c1':['0','1'],'moisture-c1':['0','60%'],'moisture-c2':['0','60%'],'moisture-x':['0','60%']};const range=soilVariable.value.startsWith('cygnss-')?['0','1 cm³/cm³']:ranges[soilVariable.value];document.querySelector('#soilLegendLow').textContent=range[0];document.querySelector('#soilLegendHigh').textContent=range[1]}
+    function loadSoilTexture(){if(!soilDate.value)return;syncSoilLegend();const params=new URLSearchParams({date:soilDate.value,variable:soilVariable.value});const request=++environmentalRequests.soil;soilStatus.textContent='Preparing Satellite soil texture…';textureLoader.load(`/api/v1/soil/texture?${params}`,texture=>{if(request!==environmentalRequests.soil){texture.dispose();return}texture.colorSpace=THREE.SRGBColorSpace;const previous=soilMaterial.map;soilMaterial.map=texture;soilMaterial.needsUpdate=true;soilOverlay.visible=activeKinds.has('soil');if(previous)previous.dispose();renderFlatMap();requestRender();const unit=soilVariable.value==='skin-temperature'?'°C':soilVariable.value==='optical-depth-c1'?'':soilVariable.value.startsWith('cygnss-')?'cm³/cm³':'%';soilStatus.textContent=`${soilDate.selectedOptions[0]?.textContent} · ${soilVariable.selectedOptions[0]?.textContent} ${unit}`;updateVisibility()},undefined,()=>{if(request===environmentalRequests.soil){soilStatus.textContent='Satellite soil texture unavailable.';soilOverlay.visible=false;const previous=soilMaterial.map;soilMaterial.map=null;soilMaterial.needsUpdate=true;if(previous)previous.dispose();renderFlatMap();requestRender();}})}
+    async function loadAtmosphereAvailability(){try{const response=await fetch('/api/v1/atmosphere/availability');if(!response.ok)throw new Error(`API returned ${response.status}`);atmosphereData=await response.json();atmosphereDate.replaceChildren();for(const date of atmosphereData.dates||[])atmosphereDate.add(new Option(`${date.slice(0,4)}-${date.slice(4,6)}`,date));atmosphereDate.disabled=!(atmosphereData.dates||[]).length;atmosphereVariable.replaceChildren();for(const [key,info] of Object.entries(atmosphereData.variables||{}))atmosphereVariable.add(new Option(`${info.field} · ${info.label}`,key));atmosphereVariable.disabled=!atmosphereVariable.options.length;if(atmosphereData.dates?.length){atmosphereDate.value=atmosphereData.dates.at(-1);if(activeKinds.has('atmosphere'))loadAtmosphereTexture()}else atmosphereStatus.textContent='No MERRA-2 monthly files found in Atmosphere folder.'}catch(error){atmosphereStatus.textContent='MERRA-2 atmosphere API unavailable.';console.info('Atmosphere availability unavailable:',error.message)}}
+    function loadAtmosphereTexture(){if(!atmosphereDate.value||!atmosphereVariable.value)return;const params=new URLSearchParams({date:atmosphereDate.value,variable:atmosphereVariable.value});const textureUrl=`/api/v1/atmosphere/texture?${params}`;const request=++environmentalRequests.atmosphere;atmosphereStatus.textContent='Preparing MERRA-2 texture…';textureLoader.load(textureUrl,texture=>{if(request!==environmentalRequests.atmosphere){texture.dispose();return}texture.colorSpace=THREE.SRGBColorSpace;const previous=atmosphereDataMaterial.map;atmosphereDataMaterial.map=texture;atmosphereDataMaterial.needsUpdate=true;atmosphereDataOverlay.visible=activeKinds.has('atmosphere');if(previous)previous.dispose();renderFlatMap();requestRender();const info=atmosphereData.variables[atmosphereVariable.value];atmosphereStatus.textContent=`${atmosphereDate.selectedOptions[0]?.textContent} · ${info?.label||atmosphereVariable.value} · ${info?.units||''} · 2nd–98th percentile`;updateScaleLegend(textureUrl,'atmosphereLegendLow','atmosphereLegendHigh',info?.units||'');updateVisibility()},undefined,()=>{if(request===environmentalRequests.atmosphere){atmosphereStatus.textContent='MERRA-2 texture unavailable for this month/parameter.';atmosphereDataOverlay.visible=false;const previous=atmosphereDataMaterial.map;atmosphereDataMaterial.map=null;atmosphereDataMaterial.needsUpdate=true;if(previous)previous.dispose();renderFlatMap();requestRender();}})}
+    radiationCadence.addEventListener('change',syncRadiationDates);radiationDate.addEventListener('change',syncRadiationDates);radiationHour.addEventListener('change',loadRadiationTexture);radiationVariable.addEventListener('change',loadRadiationTexture);
+    document.querySelector('#soilProduct').addEventListener('change',async()=>{soilMaterial.map?.dispose();soilMaterial.map=null;soilOverlay.visible=false;await loadSoilAvailability();refreshInspection();updateVisibility()});
+    waterDate.addEventListener('change',loadWaterTexture);waterPass.addEventListener('change',loadWaterTexture);waterVariable.addEventListener('change',loadWaterTexture);soilDate.addEventListener('change',loadSoilTexture);soilVariable.addEventListener('change',loadSoilTexture);atmosphereDate.addEventListener('change',loadAtmosphereTexture);atmosphereVariable.addEventListener('change',loadAtmosphereTexture);
+    temperaturePeriod.addEventListener('change',loadTemperatureTexture);temperatureView.addEventListener('change',()=>{syncTemperaturePeriods();if(temperaturePeriod.value)loadTemperatureTexture();else{temperatureOverlay.visible=false;temperatureStatus.textContent='No composite available for this view.';renderFlatMap();requestRender();}});
+    const layerExplanations={
+      temperature:{title:'Surface temperature · MODIS',basis:'Terra MODIS MOD21C2 estimates land-surface temperature from thermal infrared observations. This layer shows an archived eight-day average, in °C, on a 0.05° grid. Day and night are separate; quality-filtered or missing cells stay transparent.',comparison:'Use this to compare surface heating and cooling at Earth sites with the temperature conditions of a particular lunar or Martian location and season. It is not air temperature, and a similar temperature alone does not reproduce the atmosphere or pressure.',note:'Source: supplied MOD21C2.061 files. The selected period is historical, not live weather.'},
+      radiation:{title:'Radiation & energy · CERES',basis:'CERES measures Earth’s radiative energy budget. Choose outgoing shortwave, outgoing longwave, or net energy at the top of the atmosphere; some products also provide modeled surface fluxes. Values are W/m², summarized for the selected week or month.',comparison:'Useful for studying energy balance and solar-power conditions. These fluxes do not measure astronaut radiation dose, cosmic rays, or equivalent Moon/Mars exposure. Compare the same flux definition and time period.',note:'Source: supplied CERES products. A weekly average uses the available observations, which may not cover every day.'},
+      water:{title:'Soil water · SMAP',basis:'SMAP microwave retrievals estimate near-surface soil water. Values are volumetric moisture in cm³/cm³ for the selected date and AM or PM pass. DCA, SCA-H and SCA-V are different retrieval methods.',comparison:'Dry Earth soils can be useful research analogs. This layer does not locate lunar ice, Martian underground ice, groundwater, or potable water. Earth liquid-soil moisture is not interchangeable with planetary ice content.',note:'Source: supplied SMAP L3 Enhanced files. Missing or rejected retrievals are not zero moisture.'},
+      soil:{title:'Soil properties · AMSR2',basis:'AMSR2 LPRM derives soil moisture from microwave observations at different frequencies. Moisture is shown in percent; other selections show surface skin temperature in °C or dimensionless optical depth.',comparison:'Use moisture and thermal conditions to examine terrestrial analog environments. These measurements do not establish basalt composition, soil chemistry, perchlorates, or mechanical similarity to lunar or Martian regolith.',note:'Source: supplied daily AMSR2 LPRM files. Similarity in one property is not a complete analog assessment.'},
+      atmosphere:{title:'Climate indices · MERRA-2',basis:'This layer uses monthly MERRA-2 climate statistics: precipitation amounts, wet/dry spells, temperature-threshold days and other indices. Units depend on the selected index: days, mm/day, K or percent. Map colors use that month’s 2nd–98th percentile range.',comparison:'These Earth climate indices help identify dry, cold or otherwise relevant test environments. They do not measure atmospheric composition or pressure and cannot reproduce the Moon’s near vacuum or Mars’s thin atmosphere.',note:'Source: supplied MERRA-2 monthly statistics. Matching colors across months does not necessarily mean matching values; read the scale and numerical measurements.'}
+    };
+    const explanationDialog=document.querySelector('#layerExplanation');
+    function showLayerExplanation(kind){const info=layerExplanations[kind];if(!info)return;document.querySelector('#layerExplanationTitle').textContent=info.title;document.querySelector('#layerExplanationBasis').textContent=info.basis;document.querySelector('#layerExplanationComparison').textContent=info.comparison;document.querySelector('#layerExplanationNote').textContent=info.note;explanationDialog.showModal()}
+    explanationDialog.addEventListener('click',event=>{if(event.target===explanationDialog){const rect=explanationDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)explanationDialog.close()}});
+    for(const input of document.querySelectorAll('.domain input[data-kind]')){
+      const row=input.closest('.domain');if(!layerExplanations[input.dataset.kind])continue;
+      row.title='Double-click for measurement basis and Moon/Mars comparison';
+      let beforeDoubleClick=input.checked;
+      row.addEventListener('pointerdown',event=>{if(event.detail===1)beforeDoubleClick=input.checked});
+      row.addEventListener('dblclick',event=>{event.preventDefault();input.checked=beforeDoubleClick;if(input.checked)activeKinds.add(input.dataset.kind);else activeKinds.delete(input.dataset.kind);row.classList.toggle('active',input.checked);updateVisibility();showLayerExplanation(input.dataset.kind)});
+      const info=document.createElement('button');info.type='button';info.className='layer-info';info.textContent='i';info.setAttribute('aria-label',`About ${layerExplanations[input.dataset.kind].title}`);
+      info.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();showLayerExplanation(input.dataset.kind)});info.addEventListener('dblclick',event=>{event.preventDefault();event.stopPropagation()});row.append(info);
+    }
+    document.querySelectorAll('[data-kind]').forEach(input=>input.addEventListener('change',()=>{input.closest('.domain').classList.toggle('active',input.checked);if(input.checked)activeKinds.add(input.dataset.kind);else activeKinds.delete(input.dataset.kind);updateVisibility();if(input.checked&&input.dataset.kind==='temperature')loadTemperatureTexture();if(input.checked&&input.dataset.kind==='radiation')loadRadiationTexture();if(input.checked&&input.dataset.kind==='water')loadWaterTexture();if(input.checked&&input.dataset.kind==='soil')loadSoilTexture();if(input.checked&&input.dataset.kind==='atmosphere')loadAtmosphereTexture()}));
+    for(const point of matchedPoints)addLocationMarkers([point],point.matchedLayer,matchedPointObjects,0x79f5ff);updateVisibility();
+    Promise.allSettled([loadTemperaturePeriods(),loadRadiationAvailability(),loadWaterAvailability(),loadSoilAvailability(),loadAtmosphereAvailability(),loadNasaBases(),loadAnalogBases()] ).then(()=>{renderAnalogDirectory();const siteId=new URLSearchParams(location.search).get('site');const site=[...nasaLocations,...analogLocations].find(site=>site.id===siteId);if(site)focusLocation(site);else refreshInspection()});
+    document.querySelectorAll('.environmental-controls select, #temperaturePeriod, #temperatureView').forEach(input=>input.addEventListener('change',refreshInspection));
+    document.querySelectorAll('[data-toggle]').forEach(button=>button.addEventListener('click',()=>{button.classList.toggle('on');const on=button.classList.contains('on');if(button.dataset.toggle==='atmosphere')atmosphere.visible=on;if(button.dataset.toggle==='rotate')controls.autoRotate=on;requestRender();}));
+    document.querySelector('#homeView').addEventListener('click',()=>{controls.reset();camera.position.set(0,0,8.4);controls.target.set(0,0,0);earthGroup.quaternion.setFromUnitVectors(xyz(38,-97).normalize(),new THREE.Vector3(0,0,1));controls.update();selectedBaseId=null;requestRender();renderFlatMap();});
+    function showToast(text){const el=document.querySelector('#toast');el.textContent=text;el.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>el.classList.remove('show'),2600)}
+    document.querySelector('#searchForm').addEventListener('submit',event=>{event.preventDefault();const q=document.querySelector('#searchInput').value.trim(),coords=q.match(/^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/);if(coords){const lat=Number(coords[1]),lon=Number(coords[2]);if(Math.abs(lat)<=90&&Math.abs(lon)<=180){const surface=xyz(lat,lon).normalize();earthGroup.quaternion.setFromUnitVectors(surface,new THREE.Vector3(0,0,1));controls.target.set(0,0,0);controls.update();inspectMapPixel(lat,lon);showToast(`Centered near ${lat.toFixed(2)}, ${lon.toFixed(2)}`);requestRender();return}}if(!q)return;const query=q.toLocaleLowerCase();const match=[...nasaLocations,...analogLocations].find(site=>[site.name,site.acronym,site.city,site.state,site.country,site.locationLabel].some(value=>String(value||'').toLocaleLowerCase().includes(query)));if(match){focusLocation(match);return}document.querySelector('#searchNote').textContent='Search a center, analog site, or city, or enter coordinates.'});
+    function clock(){document.querySelector('#utcClock').textContent=new Date().toISOString().slice(11,19)}clock();setInterval(clock,1000);
+    const resize=()=>{const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const dpr=Math.min(devicePixelRatio||1,2);flatMap.width=Math.round(w*dpr);flatMap.height=Math.round(h*dpr);renderFlatMap();requestRender();};new ResizeObserver(resize).observe(canvas);resize();document.querySelector('#viewModeToggle').addEventListener('click',()=>setViewMode(viewMode==='3d'?'2d':'3d'));
+
+    function animate(){
+      if (viewMode !== '3d') {
+        requestAnimationFrame(animate);
+        return;
+      }
+
+      const shouldRender =
+        renderRequested ||
+        controls.autoRotate ||
+        document.hidden === false;
+
+      if (shouldRender) {
+        controls.update();
+        renderer.render(scene, camera);
+        renderRequested = false;
+      }
+
+      if (shouldRender || controls.autoRotate) {
+        requestAnimationFrame(animate);
+      } else {
+        setTimeout(() => requestAnimationFrame(animate), 120);
       }
     }
 
-    async function loadSolarData() {
-      try {
-        const data = await fetchJson('/api/v1/solar?limit=150');
-        solarGroup.clear();
-        (data.records || []).forEach(record => {
-          const dot = makeMarker(0xffbd69, 0.024); dot.position.copy(latLonToVector(record.latitude, record.longitude, earthRadius + 0.025)); dot.userData = { label: 'Solar sample', detail: `${record.latitude.toFixed(2)}°, ${record.longitude.toFixed(2)}° • ${record.surfaceShortwaveDownWm2 ?? record.toaInsolationWm2 ?? 'n/a'} W/m²` };
-          solarGroup.add(dot);
-        });
-      } catch (error) {
-        console.warn(error);
-        solarGroup.clear();
-      }
-    }
-
-    const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
-    function onPointerMove(event) {
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, camera);
-      const hitObjects = [...aircraftGroup.children, ...solarGroup.children];
-      const hit = raycaster.intersectObjects(hitObjects, false)[0];
-      if (!hit) { return; }
-      const obj = hit.object; if (!obj.userData) return;
-      const tooltipDiv = document.getElementById('toast');
-      tooltipDiv.textContent = `${obj.userData.label} — ${obj.userData.detail}`;
-      tooltipDiv.classList.add('show');
-      clearTimeout(onPointerMove.timer); onPointerMove.timer = setTimeout(() => tooltipDiv.classList.remove('show'), 1500);
-    }
-    canvas.addEventListener('pointermove', onPointerMove);
-    canvas.addEventListener('pointerleave', () => document.getElementById('toast').classList.remove('show'));
-
-    document.getElementById('refreshData').addEventListener('click', async () => { await Promise.all([loadAirData(), loadSolarData()]); showToast('Data refreshed'); });
-    document.getElementById('homeView').addEventListener('click', () => { camera.position.set(0,0,8.8); controls.target.set(0,0,0); controls.update(); showToast('Reset view'); });
-    function clock() { document.getElementById('utcClock').textContent = new Date().toISOString().slice(11, 19); }
-    clock(); setInterval(clock, 1000);
-
-    function resize() {
-      const w = window.innerWidth, h = window.innerHeight;
-      camera.aspect = w / h; camera.updateProjectionMatrix();
-      renderer.setSize(w, h, false);
-    }
-    window.addEventListener('resize', resize);
-
-    function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
-
-    surfaceGlow.visible = true; aircraftGroup.visible = true; solarGroup.visible = true;
-    Promise.all([loadAirData(), loadSolarData()]).finally(() => animate());
+    animate();
   </script>
 </body>
 </html>
