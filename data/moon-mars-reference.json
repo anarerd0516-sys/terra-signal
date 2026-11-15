@@ -1,0 +1,57 @@
+{
+  "status": "user_supplied_unverified_reference",
+  "source": "Screenshot 2026-11-15 at 13.27.13.png",
+  "note": "Transcribed from the supplied screenshot. Incomplete entries are marked. These are contextual statements, not measured Earth-site values or ranking criteria.",
+  "parameters": [
+    {
+      "parameter": "Temperature",
+      "moon": "polar crater [incomplete entry]",
+      "mars": "-120 to +20 °C; about -60 °C average"
+    },
+    {
+      "parameter": "Atmosphere",
+      "moon": "Almost none (vacuum [incomplete entry]",
+      "mars": "of Earth’s) [incomplete entry]"
+    },
+    {
+      "parameter": "Gravity",
+      "moon": "16% of Earth’s (1.6 m/s²)",
+      "mars": "38% of Earth’s (3.7 m/s²)"
+    },
+    {
+      "parameter": "Radiation",
+      "moon": "Very high; no air or magnetic field",
+      "mars": "High; thin air, no magnetic field"
+    },
+    {
+      "parameter": "Water/Hydrosphere",
+      "moon": "shadowed craters (a few wt% in places)",
+      "mars": "underground ice (about 5–50 wt% at high latitudes); possible brines"
+    },
+    {
+      "parameter": "Soil",
+      "moon": "charged basalt dust",
+      "mars": "perchlorates"
+    },
+    {
+      "parameter": "Power",
+      "moon": "polar peaks with near-constant light",
+      "mars": "about 24.6 h; dust storms can cut sunlight sharply"
+    },
+    {
+      "parameter": "Isolation",
+      "moon": "3 days travel",
+      "mars": "months of travel"
+    },
+    {
+      "parameter": "Dust and wind",
+      "moon": "No wind; dust moves by impacts and rocket exhaust",
+      "mars": "winds of a few m/s, but thin air makes the force weak"
+    },
+    {
+      "parameter": "Subsurface/Caves",
+      "moon": "pits found) [incomplete entry]",
+      "mars": "Candidate lava tubes and skylights"
+    }
+  ]
+}

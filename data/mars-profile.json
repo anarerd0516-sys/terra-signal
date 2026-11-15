@@ -1,0 +1,121 @@
+{
+  "id": "mars_surface_v1",
+  "name": "Mars surface analog profile",
+  "body": "Mars",
+  "status": "initial_reference_profile",
+  "source_note": "Values transcribed from the user-provided table. Treat as provisional until each value is reviewed against a cited dataset, location, season, and measurement method.",
+  "comparison_policy": {
+    "direct": "Compare Earth measurements with a compatible Mars measurement and state the spatial and temporal scales.",
+    "proxy": "Use only when a direct Earth equivalent is unavailable; label the proxy and do not present it as an equivalent measurement.",
+    "context_only": "Show as mission context, but do not use to rank Earth locations.",
+    "not_comparable_on_earth": "Do not use as an Earth-location filter because the planetary property cannot be reproduced at a terrestrial site."
+  },
+  "planetary_context": {
+    "radius_km": { "value": 3389.5, "comparison": "context_only" },
+    "diameter_km": { "value": 6779, "comparison": "context_only" },
+    "mass_kg": { "value": 6.417e23, "comparison": "context_only" },
+    "surface_gravity_m_s2": { "value": 3.71, "comparison": "not_comparable_on_earth" },
+    "surface_gravity_earth_g": { "value": 0.38, "comparison": "not_comparable_on_earth" },
+    "mean_density_kg_m3": { "value": 3933, "comparison": "context_only" },
+    "sol_length_seconds": { "value": 88775, "comparison": "context_only" },
+    "year_length_earth_days": { "value": 687, "comparison": "context_only" },
+    "axial_tilt_degrees": { "value": 25.19, "comparison": "context_only" },
+    "mean_sun_distance_km": { "value": 227900000, "comparison": "context_only" }
+  },
+  "environment": {
+    "atmosphere": {
+      "composition_percent": {
+        "co2": 95.1,
+        "n2": 2.6,
+        "argon": 1.9,
+        "o2": 0.16,
+        "co": 0.06
+      },
+      "surface_pressure_pa": { "value": 610, "comparison": "not_comparable_on_earth" },
+      "surface_pressure_mbar": { "value": 6.1, "comparison": "not_comparable_on_earth" },
+      "air_density_kg_m3": { "value": 0.02, "comparison": "not_comparable_on_earth" },
+      "sound_speed_m_s": { "value": 240, "comparison": "context_only" },
+      "notes": "Earth atmosphere composition and pressure cannot be matched by an outdoor terrestrial location."
+    },
+    "climate": {
+      "mean_surface_temperature_c": { "value": -63, "comparison": "direct_with_caveats" },
+      "daytime_high_c": { "value": 20, "comparison": "direct_with_caveats" },
+      "low_temperature_c": { "value": -125, "comparison": "direct_with_caveats" },
+      "equatorial_day_temperature_c": { "min": -20, "max": 20, "comparison": "direct_with_caveats" },
+      "night_temperature_c": { "min": -100, "max": -70, "comparison": "direct_with_caveats" },
+      "polar_winter_temperature_c": { "max": -125, "comparison": "direct_with_caveats" },
+      "ordinary_wind_speed_m_s": { "min": 2, "max": 10, "comparison": "direct_with_caveats" },
+      "storm_wind_speed_m_s": { "min": 20, "max": 30, "comparison": "direct_with_caveats" },
+      "relative_humidity": { "value": null, "comparison": "direct_with_caveats", "notes": "Highly variable by location and time; add a time- and site-specific dataset before ranking." },
+      "water_vapor_ppmv": { "value": null, "comparison": "direct_with_caveats", "notes": "Very low and variable; source a measurement or model product before ranking." },
+      "notes": "Compare distributions and day/night ranges, not only annual means. Mars and Earth surface measurements have different atmospheres, pressure, and radiative environments."
+    },
+    "radiation": {
+      "mean_solar_irradiance_w_m2": { "value": 586, "comparison": "proxy_with_model" },
+      "solar_irradiance_earth_percent": { "value": 43, "comparison": "context_only" },
+      "curiosity_rad_absorbed_dose_ugy_day": { "value": 210, "comparison": "not_comparable_on_earth" },
+      "gcr_flux": { "value": null, "comparison": "not_comparable_on_earth" },
+      "global_magnetic_field": { "value": "absent; local remnant crustal fields exist", "comparison": "not_comparable_on_earth" },
+      "uv_shielding": { "value": "very limited ozone shielding", "comparison": "proxy_with_model" },
+      "notes": "NASA POWER solar irradiance is not ionizing-radiation dose. Earth-site UV or shielding metrics must remain distinct proxies, not substitutes for Mars RAD measurements."
+    },
+    "geology_and_soil": {
+      "dominant_material": { "value": "basaltic regolith", "comparison": "proxy" },
+      "perchlorate_weight_percent": { "min": 0.4, "max": 0.6, "comparison": "proxy" },
+      "soil_ph": { "min": 7.7, "max": 8.5, "comparison": "direct_with_caveats" },
+      "grain_size": { "value": "micrometers to millimeters", "comparison": "proxy" },
+      "minerals": ["iron oxides", "olivine", "pyroxene", "sulfates", "clays"],
+      "salts": ["perchlorates", "sulfates"],
+      "surface_soil_moisture": { "value": "very low; location-dependent", "comparison": "direct_with_caveats" }
+    },
+    "water_and_ice": {
+      "stable_surface_liquid_water": { "value": "generally not stable", "comparison": "context_only" },
+      "polar_ice_caps": { "value": "water ice and carbon dioxide ice", "comparison": "proxy" },
+      "subsurface_water_ice": { "value": "detected or inferred in multiple regions", "comparison": "proxy" },
+      "ice_depth_m": { "value": null, "comparison": "proxy", "notes": "Location-specific; resolve against an orbital dataset before use." },
+      "hydrated_minerals": { "value": "detected", "comparison": "proxy" },
+      "atmospheric_water_vapor_ppmv": { "value": null, "comparison": "direct_with_caveats" }
+    },
+    "topography": {
+      "olympus_mons_height_km": { "value": 22, "comparison": "context_only" },
+      "valles_marineris_length_km": { "value": 4000, "comparison": "context_only" },
+      "hellas_planitia_depth_km": { "value": 7, "comparison": "context_only" },
+      "site_slope_degrees": { "value": null, "comparison": "direct" },
+      "site_elevation_m": { "value": null, "comparison": "direct" },
+      "surface_roughness": { "value": null, "comparison": "direct" },
+      "lava_tubes_and_caves": { "value": "candidate openings observed in HiRISE imagery", "comparison": "proxy" }
+    }
+  },
+  "candidate_ranking": {
+    "initially_usable_parameters": [
+      "climate temperature distributions",
+      "wind speed distributions",
+      "solar irradiance with atmospheric correction kept explicit",
+      "slope",
+      "elevation",
+      "surface roughness",
+      "geology and mineralogy",
+      "soil moisture and salinity",
+      "water or ice indicators"
+    ],
+    "exclude_from_earth_site_score": [
+      "planetary radius",
+      "planetary mass",
+      "planetary gravity",
+      "planetary density",
+      "Mars atmospheric composition",
+      "Mars surface pressure",
+      "Mars ionizing-radiation dose",
+      "global magnetic-field state"
+    ],
+    "ranking_note": "Do not calculate a single suitability score until target sources, units, spatial resolution, temporal coverage, weights, and missing-data behavior are defined."
+  },
+  "provenance": {
+    "user_supplied_profile": true,
+    "reference_links_for_validation": [
+      "https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+      "https://science.nasa.gov/resource/radiation-measurements-on-mars/",
+      "https://science.nasa.gov/mission/msl-curiosity/science-instruments/"
+    ]
+  }
+}
