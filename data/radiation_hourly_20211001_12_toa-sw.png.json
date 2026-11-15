@@ -1,0 +1,1 @@
+{"layer":"radiation","cadence":"hourly","hour":12,"variable":"toa-sw","label":"CERES all-sky TOA outgoing shortwave flux","units":"W/m²","sourceFiles":1,"gridResolution":"1 degree","validCells":173280,"min":0,"max":657.424,"displayMin":0,"displayMax":500}

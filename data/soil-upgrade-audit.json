@@ -1,0 +1,52 @@
+[
+  {
+    "resolution": "9km",
+    "files": 160,
+    "readable": 160,
+    "first": "cyg.ddmi.s20260601-030000-e20260601-210000.l3.grid-soil-moisture-9km.a32.d33.nc",
+    "last": "cyg.ddmi.s20261111-030000-e20261111-210000.l3.grid-soil-moisture-9km.a32.d33.nc",
+    "grid": [
+      1,
+      1004,
+      3204
+    ],
+    "validCells": 149015,
+    "minimum": 0.00024496373953297734,
+    "maximum": 0.9857843518257141,
+    "latitudeRange": [
+      -38.096923828125,
+      38.096923828125
+    ],
+    "longitudeRange": [
+      -134.9533233642578,
+      164.0819549560547
+    ],
+    "summary": "CYGNSS is a NASA Earth Venture mission, managed by the Earth System Science Pathfinder Program. The mission consists of a constellation of eight small satellites. The eight observatories comprise a constellation that measures the ocean surface wind field with very high temporal resolution and spatial coverage, under all precipitating conditions, and over the full dynamic range of wind speeds experienced in a tropical cyclone. The CYGNSS observatories fly in 510 km circular orbits at a common inclination of 35\u00b0. Each observatory includes a Delay Doppler Mapping Instrument (DDMI) consisting of a modified GPS receiver capable of measuring surface scattering, a low gain zenith antenna for measurement of the direct GPS signal, and two high gain nadir antennas for measurement of the weaker scattered signal. Each DDMI is capable of measuring 4 simultaneous bi-static reflections, resulting in a total of 32 wind measurements per second by the full constellation.",
+    "errors": []
+  },
+  {
+    "resolution": "36km",
+    "files": 160,
+    "readable": 160,
+    "first": "cyg.ddmi.s20260601-030000-e20260601-210000.l3.grid-soil-moisture-36km.a32.d33.nc",
+    "last": "cyg.ddmi.s20261111-030000-e20261111-210000.l3.grid-soil-moisture-36km.a32.d33.nc",
+    "grid": [
+      1,
+      252,
+      802
+    ],
+    "validCells": 32791,
+    "minimum": 0.00037506024818867445,
+    "maximum": 0.9866107702255249,
+    "latitudeRange": [
+      -38.141571044921875,
+      38.141571044921875
+    ],
+    "longitudeRange": [
+      -135.0,
+      164.12863159179688
+    ],
+    "summary": "CYGNSS is a NASA Earth Venture mission, managed by the Earth System Science Pathfinder Program. The mission consists of a constellation of eight small satellites. The eight observatories comprise a constellation that measures the ocean surface wind field with very high temporal resolution and spatial coverage, under all precipitating conditions, and over the full dynamic range of wind speeds experienced in a tropical cyclone. The CYGNSS observatories fly in 510 km circular orbits at a common inclination of 35\u00b0. Each observatory includes a Delay Doppler Mapping Instrument (DDMI) consisting of a modified GPS receiver capable of measuring surface scattering, a low gain zenith antenna for measurement of the direct GPS signal, and two high gain nadir antennas for measurement of the weaker scattered signal. Each DDMI is capable of measuring 4 simultaneous bi-static reflections, resulting in a total of 32 wind measurements per second by the full constellation.",
+    "errors": []
+  }
+]

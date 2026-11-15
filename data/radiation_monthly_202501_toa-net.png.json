@@ -1,0 +1,1 @@
+{"layer":"radiation","cadence":"monthly","hour":null,"variable":"toa-net","label":"CERES all-sky regional TOA net flux","units":"W/m²","sourceFiles":1,"gridResolution":"1 degree","validCells":1036800,"min":-194.633,"max":175.001,"displayMin":-200,"displayMax":300}

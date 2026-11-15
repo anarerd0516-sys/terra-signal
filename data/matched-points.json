@@ -1,0 +1,100 @@
+{
+  "source": "matched magnitude.pdf",
+  "points": [
+    {
+      "id": "matched-temperature",
+      "name": "Surface temperature reference point",
+      "latitude": -15.157,
+      "longitude": -51.81,
+      "matchedLayer": "temperature",
+      "referenceMagnitude": "58.3 °C",
+      "sourceDocument": "matched magnitude.pdf",
+      "target": [
+        "Moon",
+        "Mars"
+      ],
+      "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.",
+      "parameters": [
+        "Surface temperature"
+      ],
+      "coordinatePrecision": "supplied coordinate",
+      "facilityType": "reference_point"
+    },
+    {
+      "id": "matched-radiation",
+      "name": "Net radiation reference point",
+      "latitude": 4.338,
+      "longitude": -46.933,
+      "matchedLayer": "radiation",
+      "referenceMagnitude": "298.9 W/m²",
+      "sourceDocument": "matched magnitude.pdf",
+      "target": [
+        "Moon",
+        "Mars"
+      ],
+      "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.",
+      "parameters": [
+        "Net radiation"
+      ],
+      "coordinatePrecision": "supplied coordinate",
+      "facilityType": "reference_point"
+    },
+    {
+      "id": "matched-water",
+      "name": "Soil water (SWAP in source) reference point",
+      "latitude": 13.924,
+      "longitude": 29.038,
+      "matchedLayer": "water",
+      "referenceMagnitude": "0.02 cm³ (unit as supplied)",
+      "sourceDocument": "matched magnitude.pdf",
+      "target": [
+        "Moon",
+        "Mars"
+      ],
+      "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.",
+      "parameters": [
+        "Soil water (SWAP in source)"
+      ],
+      "coordinatePrecision": "supplied coordinate",
+      "facilityType": "reference_point"
+    },
+    {
+      "id": "matched-soil",
+      "name": "Soil moisture reference point",
+      "latitude": -23.672,
+      "longitude": 140.768,
+      "matchedLayer": "soil",
+      "referenceMagnitude": "~0%",
+      "sourceDocument": "matched magnitude.pdf",
+      "target": [
+        "Moon",
+        "Mars"
+      ],
+      "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.",
+      "parameters": [
+        "Soil moisture"
+      ],
+      "coordinatePrecision": "supplied coordinate",
+      "facilityType": "reference_point"
+    },
+    {
+      "id": "matched-atmosphere",
+      "name": "Atmosphere reference point",
+      "latitude": 73.576,
+      "longitude": 39.507,
+      "matchedLayer": "atmosphere",
+      "referenceMagnitude": "3.68 mm/day",
+      "sourceDocument": "matched magnitude.pdf",
+      "target": [
+        "Moon",
+        "Mars"
+      ],
+      "focus": "User-supplied Moon/Mars matching location. Observation date and matching method were not specified.",
+      "parameters": [
+        "Atmosphere"
+      ],
+      "coordinatePrecision": "supplied coordinate",
+      "facilityType": "reference_point"
+    }
+  ]
+}

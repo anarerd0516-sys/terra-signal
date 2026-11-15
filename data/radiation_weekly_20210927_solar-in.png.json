@@ -1,0 +1,1 @@
+{"layer":"radiation","cadence":"weekly","hour":null,"variable":"solar-in","label":"Top-of-atmosphere incoming solar radiation","units":"W/m²","sourceFiles":3,"gridResolution":"1 degree","validCells":1036800,"min":0,"max":989.55,"displayMin":0,"displayMax":1400}
