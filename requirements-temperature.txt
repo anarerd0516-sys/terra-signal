@@ -1,0 +1,3 @@
+numpy>=1.26
+Pillow>=10.0
+# Install GDAL from the matching system package / wheel so it matches libgdal.
