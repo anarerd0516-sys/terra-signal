@@ -1,0 +1,46 @@
+{
+  "title": "The most matched measurement thresholds on both between mars and moon",
+  "interpretation": "Primary approximate matched readings supplied for Moon and Mars comparison. These are not validated planetary suitability thresholds and do not establish that an Earth coordinate is physically equivalent to a lunar or Martian site.",
+  "measurements": [
+    {
+      "id": 1,
+      "parameter": "Surface Temperature",
+      "coordinate": "-15.157°, -51.810°",
+      "latitude": -15.157,
+      "longitude": -51.810,
+      "magnitude": "58.3C"
+    },
+    {
+      "id": 2,
+      "parameter": "Net Radiation",
+      "coordinate": "4.338°, -46.933°",
+      "latitude": 4.338,
+      "longitude": -46.933,
+      "magnitude": "298.9 W/m^2"
+    },
+    {
+      "id": 3,
+      "parameter": "Soil Water SWAP",
+      "coordinate": "13.924°, 29.038°",
+      "latitude": 13.924,
+      "longitude": 29.038,
+      "magnitude": "0.02cm^3"
+    },
+    {
+      "id": 4,
+      "parameter": "Soil Moisture",
+      "coordinate": "-23.672°, 140.768°",
+      "latitude": -23.672,
+      "longitude": 140.768,
+      "magnitude": "~0%"
+    },
+    {
+      "id": 5,
+      "parameter": "Atmosphere",
+      "coordinate": "73.576°, 39.507°",
+      "latitude": 73.576,
+      "longitude": 39.507,
+      "magnitude": "3.68mm/day"
+    }
+  ]
+}
