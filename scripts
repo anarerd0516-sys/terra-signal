@@ -1,0 +1,792 @@
+#!/usr/bin/env python3
+"""Render an hourly CERES or daily SMAP source field as a transparent globe texture."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+from pathlib import Path
+
+import numpy as np
+from netCDF4 import Dataset as NetCDFDataset
+import os
+from contextlib import contextmanager
+import shutil
+import tempfile
+from PIL import Image
+
+
+@contextmanager
+def Dataset(source):
+    # netCDF's Windows HDF4 reader needs an ASCII path. Use the filesystem's
+    # short path when available, otherwise copy into a temporary directory.
+    path = Path(source)
+    if os.name == 'nt' and not str(path).isascii():
+        import ctypes
+        buffer = ctypes.create_unicode_buffer(32768)
+        length = ctypes.windll.kernel32.GetShortPathNameW(str(path.resolve()), buffer, len(buffer))
+        if length and buffer.value.isascii():
+            path = Path(buffer.value)
+        else:
+            with tempfile.TemporaryDirectory(prefix='terra-') as temporary:
+                target = Path(temporary) / 'observation.nc'
+                shutil.copyfile(path, target)
+                with NetCDFDataset(target) as dataset:
+                    yield dataset
+            return
+    with NetCDFDataset(path) as dataset:
+        yield dataset
+
+
+WIDTH = 1440
+HEIGHT = 720
+AEROSOL_FIELDS = {
+    'aod550': ('Aerosol_Optical_Thickness_550_Land_Ocean_Best_Estimate', 'QA-filtered aerosol optical thickness at 550 nm', '1', 0.0, 2.0),
+    'angstrom': ('Angstrom_Exponent_Land_Ocean_Best_Estimate', 'QA-filtered Angstrom exponent', '1', 0.0, 2.5),
+}
+
+
+def aerosol_values(source, variable):
+    field, label, units, low, high = AEROSOL_FIELDS[variable]
+    with Dataset(source) as dataset:
+        latitude = masked_float(dataset.variables['Latitude'])
+        longitude = masked_float(dataset.variables['Longitude'])
+        values = masked_float(dataset.variables[field])
+    return latitude, longitude, values, label, units, low, high
+
+
+def aerosol_result(args):
+    latitude, longitude, values, label, units, low, high = aerosol_values(args.source, args.variable)
+    result = {'layer': 'aerosol', 'variable': args.variable, 'label': label, 'units': units,
+              'coverage': 'single satellite swath; not global coverage', 'quality': 'product Best_Estimate QA-filtered field'}
+    if args.sample_lat is not None:
+        # Great-circle distance prevents a remote swath edge being reported as a local observation.
+        lat1, lat2 = np.deg2rad(args.sample_lat), np.deg2rad(latitude)
+        dlon = np.deg2rad(longitude - args.sample_lon)
+        hav = np.sin((lat2 - lat1) / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
+        distance = 6371.0 * 2 * np.arcsin(np.sqrt(np.clip(hav, 0, 1)))
+        distance[~np.isfinite(latitude) | ~np.isfinite(longitude)] = np.inf
+        row, col = np.unravel_index(np.argmin(distance), distance.shape)
+        covered = bool(distance[row, col] <= 25)
+        value = values[row, col]
+        return {**result, 'value': float(value) if covered and np.isfinite(value) else None,
+                'masked': not covered or not bool(np.isfinite(value)), 'withinCoverage': covered,
+                'latitude': float(latitude[row, col]), 'longitude': float(longitude[row, col]),
+                'sampleMethod': 'nearest swath cell within 25 km'}
+    return {**result, **colorize(regrid(latitude, longitude, values), args.output, low, high)}
+PALETTE = np.array([
+    [33, 102, 172],
+    [103, 169, 207],
+    [247, 247, 247],
+    [239, 138, 98],
+    [178, 24, 43],
+], dtype=np.float32)
+
+RADIATION_FIELDS = {
+    "toa-sw": ("all_toa_sw", "CERES all-sky TOA outgoing shortwave flux", "W/m²", 0.0, 500.0),
+    "toa-lw": ("all_toa_lw", "CERES all-sky TOA outgoing longwave flux", "W/m²", 100.0, 350.0),
+    "toa-net": ("all_toa_net", "CERES all-sky TOA net flux", "W/m²", -200.0, 300.0),
+    "solar-in": ("toa_sw_insol", "Top-of-atmosphere incoming solar radiation", "W/m²", 0.0, 1400.0),
+    "surface-sw-down": ("modb_all_sfc_sw_down", "Model B all-sky surface downward shortwave flux", "W/m²", 0.0, 1000.0),
+    "surface-lw-down": ("modb_all_sfc_lw_down", "Model B all-sky surface downward longwave flux", "W/m²", 100.0, 500.0),
+}
+MONTHLY_RADIATION_FIELDS = {
+    "toa-sw": ("all_toa_sw_reg", "CERES all-sky regional TOA shortwave flux", "W/m²", 0.0, 500.0),
+    "toa-lw": ("all_toa_lw_reg", "CERES all-sky regional TOA longwave flux", "W/m²", 100.0, 350.0),
+    "toa-net": ("all_toa_net_reg", "CERES all-sky regional TOA net flux", "W/m²", -200.0, 300.0),
+}
+
+WATER_FIELDS = {
+    "soil-moisture": ("soil_moisture", "Soil moisture (DCA)", "cm³/cm³", 0.0, 0.6),
+    "soil-moisture-h": ("soil_moisture_scah", "Soil moisture (SCA-H)", "cm³/cm³", 0.0, 0.6),
+    "soil-moisture-v": ("soil_moisture_scav", "Soil moisture (SCA-V)", "cm³/cm³", 0.0, 0.6),
+}
+
+SOIL_FIELDS = {
+    "moisture-c1": ("soil_moisture_c1", "Volumetric soil moisture · 6.9 GHz", "%", 0.0, 60.0),
+    "moisture-c2": ("soil_moisture_c2", "Volumetric soil moisture · 7.3 GHz", "%", 0.0, 60.0),
+    "moisture-x": ("soil_moisture_x", "Volumetric soil moisture · 10.7 GHz", "%", 0.0, 60.0),
+    "skin-temperature": ("ts", "Surface skin temperature", "°C", -10.0, 40.0),
+    "optical-depth-c1": ("opt_depth_c1", "Optical depth · 6.9 GHz", "", 0.0, 1.0),
+}
+
+
+ATMOSPHERE_FIELDS = {
+    "r90p": ("R90P", "Heavy-rain precipitation · 90th percentile", "mm/day"),
+    "r90d": ("R90D", "Heavy-rain days · 90th percentile", "days"),
+    "r95p": ("R95P", "Very-heavy-rain precipitation · 95th percentile", "mm/day"),
+    "r95d": ("R95D", "Very-heavy-rain days · 95th percentile", "days"),
+    "r99p": ("R99P", "Extreme-rain precipitation · 99th percentile", "mm/day"),
+    "r99d": ("R99D", "Extreme-rain days · 99th percentile", "days"),
+    "drydays": ("drydays", "Dry days (<1 mm precipitation)", "days"),
+    "wetdays": ("wetdays", "Wet days (≥1 mm precipitation)", "days"),
+    "r10mm": ("R10mm", "Days with ≥10 mm precipitation", "days"),
+    "r20mm": ("R20mm", "Days with ≥20 mm precipitation", "days"),
+    "rx1day": ("RX1Day", "Maximum one-day precipitation", "mm/day"),
+    "cwd": ("CWD", "Longest consecutive wet spell", "days"),
+    "sdii": ("SDII", "Precipitation intensity on wet days", "mm/day"),
+    "cdd": ("CDD", "Longest consecutive dry spell", "days"),
+    "fd": ("FD", "Frost days", "days"),
+    "su": ("SU", "Summer days (>25 C maximum temperature)", "days"),
+    "id": ("ID", "Icing days (<0 C maximum temperature)", "days"),
+    "tr": ("TR", "Tropical nights (>20 C minimum temperature)", "days"),
+    "dtr": ("DTR", "Diurnal temperature range", "K"),
+    "tx90p": ("TX90p", "Warm maximum-temperature days", "%"),
+    "tn90p": ("TN90p", "Warm minimum-temperature nights", "%"),
+    "tx10p": ("TX10p", "Cool maximum-temperature days", "%"),
+    "tn10p": ("TN10p", "Cool minimum-temperature nights", "%"),
+    "hwn": ("HWN", "Heatwave events", "events"),
+    "hwd": ("HWD", "Longest heatwave duration", "days"),
+    "hwf": ("HWF", "Heatwave days", "days"),
+    "hwa": ("HWA", "Heatwave amplitude", "K"),
+    "hwm": ("HWM", "Heatwave magnitude anomaly", "K"),
+    "wsdi": ("WSDI", "Warm-spell duration index", "days"),
+    "lws": ("LWS", "Longest warm spell", "days"),
+    "csdi": ("CSDI", "Cold-spell duration index", "days"),
+    "lcs": ("LCS", "Longest cold spell", "days"),
+    "rx5day": ("RX5Day", "Maximum five-day precipitation", "mm/5 days"),
+    "rx5daycount": ("RX5Daycount", "Heavy five-day precipitation periods", "periods"),
+}
+
+SWATH_RADIATION_FIELDS = {
+    "toa-sw": ("toa_shortwave_flux", "Outgoing shortwave · TOA", 0.0, 500.0),
+    "toa-lw": ("toa_longwave_flux", "Outgoing longwave · TOA", 100.0, 350.0),
+    "toa-net": ("net", "Net incoming radiation · TOA", -200.0, 500.0),
+    "solar-in": ("toa_incoming_solar_radiation", "Incoming solar · TOA", 0.0, 1400.0),
+    "surface-sw-down": ("model_b_surface_shortwave_downward_flux", "Downward shortwave · surface", 0.0, 1000.0),
+    "surface-lw-down": ("model_b_surface_longwave_downward_flux", "Downward longwave · surface", 100.0, 500.0),
+}
+
+
+def masked_float(variable) -> np.ndarray:
+    data = np.ma.asarray(variable[:], dtype=np.float32)
+    values = data.filled(np.nan)
+    values[~np.isfinite(values) | (np.abs(values) > 1.0e30)] = np.nan
+    return values
+
+
+def colorize(values: np.ndarray, output: Path, low: float, high: float) -> dict:
+    valid = np.isfinite(values)
+    if not valid.any():
+        raise RuntimeError("No valid observations are available for the selected field.")
+
+    position = np.clip((values - low) / (high - low), 0.0, 1.0) * (len(PALETTE) - 1)
+    lower = np.floor(np.nan_to_num(position, nan=0.0)).astype(np.int8)
+    upper = np.minimum(lower + 1, len(PALETTE) - 1)
+    fraction = np.nan_to_num(position - lower, nan=0.0)[..., None]
+    rgb = PALETTE[lower] * (1.0 - fraction) + PALETTE[upper] * fraction
+    rgba = np.zeros((HEIGHT, WIDTH, 4), dtype=np.uint8)
+    rgba[..., :3] = np.clip(rgb, 0, 255).astype(np.uint8)
+    rgba[..., 3] = np.where(valid, 220, 0).astype(np.uint8)
+    # Three.js SphereGeometry starts at longitude -90 degrees at texture u=0.
+    rgba = np.roll(rgba, -WIDTH // 4, axis=1)
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.with_suffix(output.suffix + ".tmp")
+    Image.fromarray(rgba, "RGBA").save(temporary, format="PNG", optimize=True)
+    temporary.replace(output)
+    sample = values[valid]
+    return {
+        "validCells": int(valid.sum()),
+        "min": round(float(np.min(sample)), 3),
+        "max": round(float(np.max(sample)), 3),
+        "displayMin": low,
+        "displayMax": high,
+    }
+
+
+def regrid(latitude: np.ndarray, longitude: np.ndarray, values: np.ndarray,
+           width: int = WIDTH, height: int = HEIGHT) -> np.ndarray:
+    latitude, longitude, values = (np.asarray(a).reshape(-1) for a in (latitude, longitude, values))
+    valid = (np.isfinite(latitude) & np.isfinite(longitude) & np.isfinite(values)
+             & (latitude >= -90.0) & (latitude <= 90.0))
+    latitude, longitude, values = latitude[valid], longitude[valid], values[valid]
+    if not values.size:
+        return np.full((HEIGHT, WIDTH), np.nan, dtype=np.float32)
+
+    longitude = (longitude + 180.0) % 360.0
+    x = np.minimum((longitude / 360.0 * width).astype(np.int32), width - 1)
+    y = np.clip(((90.0 - latitude) / 180.0 * height).astype(np.int32), 0, height - 1)
+    index = y * width + x
+    sums = np.bincount(index, weights=values, minlength=width * height)
+    counts = np.bincount(index, minlength=width * height)
+    result = np.full(width * height, np.nan, dtype=np.float32)
+    occupied = counts > 0
+    result[occupied] = (sums[occupied] / counts[occupied]).astype(np.float32)
+    return result.reshape(height, width)
+
+
+def render_radiation(source: Path, hour: int, variable: str, cadence: str, output: Path) -> dict:
+    field, label, units, low, high = (MONTHLY_RADIATION_FIELDS if cadence == "monthly" else RADIATION_FIELDS)[variable]
+    with Dataset(source) as dataset:
+        if field not in dataset.variables:
+            raise RuntimeError(f"{field} is not present in {source.name}.")
+        values = masked_float(dataset.variables[field][:, :] if cadence == "monthly"
+                              else dataset.variables[field][hour, :, :])
+        latitude = np.asarray(dataset.variables["latitude"][:], dtype=np.float32)
+        longitude = np.asarray(dataset.variables["longitude"][:], dtype=np.float32)
+    # Source cells are 1 degree; fill their full area in the finer output texture.
+    grid = regrid(*np.meshgrid(latitude, longitude, indexing="ij"), values,
+                  width=360, height=180)
+    grid = np.repeat(np.repeat(grid, HEIGHT // 180, axis=0), WIDTH // 360, axis=1)
+    stats = colorize(grid, output, low, high)
+    return {"layer": "radiation", "date": source.name[-(6 if cadence == 'monthly' else 8):],
+            "cadence": cadence, "hour": hour if cadence == "hourly" else None,
+            "variable": variable, "label": label, "units": units, **stats}
+
+
+def render_radiation_grids(sources: list[Path], hour: int, variable: str,
+                           cadence: str, output: Path) -> dict:
+    """Render a global 1-degree CERES grid; weekly means average daily means."""
+    fields = MONTHLY_RADIATION_FIELDS if cadence == "monthly" else RADIATION_FIELDS
+    field, label, units, low, high = fields[variable]
+    total = np.zeros((180, 360), dtype=np.float64)
+    count = np.zeros((180, 360), dtype=np.uint16)
+    for source in sources:
+        with Dataset(source) as dataset:
+            if field not in dataset.variables:
+                raise RuntimeError(f"{field} is not present in {source.name}.")
+            data = masked_float(dataset.variables[field][:])
+            if cadence == "monthly":
+                values = data
+            elif data.ndim == 3:
+                # Hourly file contains the full day's UTC fields. Weekly uses the
+                # mean of available hours for each day, then weights days equally.
+                if cadence == "weekly":
+                    valid_hours = np.isfinite(data)
+                    hours = np.sum(np.where(valid_hours, data, 0.0), axis=0)
+                    n_hours = np.sum(valid_hours, axis=0)
+                    values = np.divide(hours, n_hours, out=np.full((180, 360), np.nan), where=n_hours > 0)
+                else:
+                    values = data[hour]
+            else:
+                values = data
+            valid = np.isfinite(values)
+            total[valid] += values[valid]
+            count[valid] += 1
+    grid = np.divide(total, count, out=np.full((180, 360), np.nan), where=count > 0).astype(np.float32)
+    grid = np.repeat(np.repeat(grid, HEIGHT // 180, axis=0), WIDTH // 360, axis=1)
+    stats = colorize(grid, output, low, high)
+    return {"layer": "radiation", "cadence": cadence, "hour": hour if cadence == "hourly" else None,
+            "variable": variable, "label": label, "units": units, "sourceFiles": len(sources),
+            "gridResolution": "1 degree", **stats}
+
+
+def render_water(source: Path, pass_name: str, variable: str, output: Path) -> dict:
+    base, label, units, low, high = WATER_FIELDS[variable]
+    suffix = "" if pass_name == "am" else "_pm"
+    group_name = f"Soil_Moisture_Retrieval_Data_{pass_name.upper()}"
+    with Dataset(source) as dataset:
+        group = dataset.groups[group_name]
+        field = base + suffix
+        lat_name, lon_name = "latitude" + suffix, "longitude" + suffix
+        values = masked_float(group.variables[field])
+        latitude = masked_float(group.variables[lat_name])
+        longitude = masked_float(group.variables[lon_name])
+    grid = regrid(latitude, longitude, values)
+    stats = colorize(grid, output, low, high)
+    date = re.search(r"_(\d{8})_R\d+_", source.name)
+    return {"layer": "water", "date": date.group(1) if date else None, "pass": pass_name,
+            "variable": variable, "label": label, "units": units, **stats}
+
+
+def cygnss_result(source, variable, output=None, latitude=None, longitude=None):
+    field = 'SIGMA_daily' if 'sigma' in variable else 'SM_daily'
+    with Dataset(source) as dataset:
+        lat = masked_float(dataset.variables['latitude'])
+        lon = masked_float(dataset.variables['longitude'])
+        values = masked_float(dataset.variables[field])[0]
+    resolution = 36 if variable.endswith('36km') else 9
+    result = {'layer':'soil', 'source':'CYGNSS L3 v3.2', 'variable':variable,
+              'label':'Daily soil moisture uncertainty' if 'sigma' in variable else 'Daily soil moisture',
+              'units':'cm³/cm³', 'gridResolution':str(resolution)+' km',
+              'coverage':'Partial coverage, approximately 38°S–38°N', 'sourceFile':source.name}
+    if output is not None:
+        return {**result, **colorize(regrid(lat,lon,values),output,0.0,1.0)}
+    delta = np.deg2rad((lon-longitude+180)%360-180)
+    a=np.sin((np.deg2rad(lat)-np.deg2rad(latitude))/2)**2+np.cos(np.deg2rad(lat))*np.cos(np.deg2rad(latitude))*np.sin(delta/2)**2
+    distance=12742*np.arcsin(np.sqrt(np.clip(a,0,1)))
+    distance[~np.isfinite(distance)]=np.inf
+    i=np.unravel_index(np.argmin(distance),distance.shape)
+    covered=bool(distance[i]<=resolution)
+    value=values[i]
+    return {**result,'value':float(value) if covered and np.isfinite(value) else None,
+            'latitude':float(lat[i]),'longitude':float(lon[i]),'masked':not covered or not bool(np.isfinite(value)),
+            'withinCoverage':covered,'sampleMethod':'nearest geolocated source cell; no gap filling'}
+
+
+def render_soil(source: Path, variable: str, output: Path) -> dict:
+    field, label, units, low, high = SOIL_FIELDS[variable]
+    with Dataset(source) as dataset:
+        values = masked_float(dataset.variables[field])
+        latitude = np.asarray(dataset.variables["Latitude"][:], dtype=np.float32)
+        longitude = np.asarray(dataset.variables["Longitude"][:], dtype=np.float32)
+    if field == "ts":
+        values = values - 273.15
+    # LPRM stores grids longitude-first; the globe texture rasterizer takes latitude-first arrays.
+    grid = regrid(*np.meshgrid(latitude, longitude, indexing="ij"), values.T)
+    stats = colorize(grid, output, low, high)
+    date = re.search(r"_(\d{8})\d{6}\.nc4$", source.name)
+    return {"layer": "soil", "date": date.group(1) if date else None,
+            "variable": variable, "label": label, "units": units, **stats}
+
+
+def render_atmosphere(source: Path, variable: str, output: Path) -> dict:
+    field, label, units = ATMOSPHERE_FIELDS[variable]
+    with Dataset(source) as dataset:
+        if field not in dataset.variables:
+            raise RuntimeError(f"{field} is not present in {source.name}.")
+        values = masked_float(dataset.variables[field][0, :, :])
+        latitude = np.asarray(dataset.variables["lat"][:], dtype=np.float32)
+        longitude = np.asarray(dataset.variables["lon"][:], dtype=np.float32)
+    grid = regrid(*np.meshgrid(latitude, longitude, indexing="ij"), values)
+    valid = grid[np.isfinite(grid)]
+    if not valid.size:
+        raise RuntimeError("No valid atmosphere observations are available for the selected field.")
+    low, high = np.percentile(valid, [2, 98]).astype(float)
+    if not np.isfinite(low) or not np.isfinite(high) or low >= high:
+        low, high = float(np.nanmin(valid)), float(np.nanmax(valid) + 1.0)
+    stats = colorize(grid, output, low, high)
+    date = re.search(r"\.(\d{6})\.nc4$", source.name)
+    return {"layer": "atmosphere", "date": date.group(1) if date else None,
+            "variable": variable, "field": field, "label": label, "units": units,
+            "scale": "2nd–98th percentile", **stats}
+
+
+def swath_radiation_values(dataset: Dataset, variable: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    field, _, _, _ = SWATH_RADIATION_FIELDS[variable]
+    position = dataset.groups["Time_and_Position"]
+    fluxes = dataset.groups["TOA_and_Surface_Fluxes"]
+    latitude = masked_float(position.variables["instrument_fov_latitude"])
+    longitude = masked_float(position.variables["instrument_fov_longitude"])
+    if field == "net":
+        values = (masked_float(fluxes.variables["toa_incoming_solar_radiation"])
+                  - masked_float(fluxes.variables["toa_shortwave_flux"])
+                  - masked_float(fluxes.variables["toa_longwave_flux"]))
+    else:
+        values = masked_float(fluxes.variables[field])
+    return latitude.reshape(-1), longitude.reshape(-1), values.reshape(-1)
+
+
+def render_swath_radiation(sources: list[Path], variable: str, output: Path) -> dict:
+    field, label, low, high = SWATH_RADIATION_FIELDS[variable]
+    sums = np.zeros(WIDTH * HEIGHT, dtype=np.float64)
+    counts = np.zeros(WIDTH * HEIGHT, dtype=np.uint16)
+    for source in sources:
+        with Dataset(source) as dataset:
+            latitude, longitude, values = swath_radiation_values(dataset, variable)
+        valid = (np.isfinite(latitude) & np.isfinite(longitude) & np.isfinite(values)
+                 & (np.abs(values) < 1.0e30) & (latitude >= -90.0) & (latitude <= 90.0))
+        if not valid.any():
+            continue
+        longitude = (longitude[valid] + 180.0) % 360.0
+        x = np.minimum((longitude / 360.0 * WIDTH).astype(np.int32), WIDTH - 1)
+        y = np.clip(((90.0 - latitude[valid]) / 180.0 * HEIGHT).astype(np.int32), 0, HEIGHT - 1)
+        indexes = y * WIDTH + x
+        sums += np.bincount(indexes, weights=values[valid], minlength=WIDTH * HEIGHT)
+        counts += np.bincount(indexes, minlength=WIDTH * HEIGHT).astype(np.uint16)
+    grid = np.full(WIDTH * HEIGHT, np.nan, dtype=np.float32)
+    occupied = counts > 0
+    if not occupied.any():
+        raise RuntimeError("No valid CERES footprint observations are available.")
+    grid[occupied] = (sums[occupied] / counts[occupied]).astype(np.float32)
+    stats = colorize(grid.reshape(HEIGHT, WIDTH), output, low, high)
+    return {"layer": "radiation", "variable": variable, "field": field,
+            "label": label, "units": "W/m²", "sourceFiles": len(sources), **stats}
+
+
+def nearest_axis(axis: np.ndarray, target: float, longitude: bool = False) -> int:
+    axis = np.asarray(axis, dtype=np.float64).reshape(-1)
+    delta = axis - target
+    if longitude:
+        delta = (delta + 180.0) % 360.0 - 180.0
+    delta[~np.isfinite(axis)] = np.inf
+    return int(np.argmin(np.abs(delta)))
+
+
+def sample_environment(source: Path, layer: str, variable: str, latitude: float,
+                       longitude: float, hour: int = 0, cadence: str = "hourly",
+                       pass_name: str = "am", sources: list[Path] | None = None,
+                       grid_sources: bool = False) -> dict:
+    if layer == "radiation":
+        if sources and not grid_sources:
+            field, label, _, _ = SWATH_RADIATION_FIELDS[variable]
+            best = (float("inf"), None, None, None)
+            for path in sources:
+                with Dataset(path) as dataset:
+                    latitudes, longitudes, values = swath_radiation_values(dataset, variable)
+                valid = np.isfinite(latitudes) & np.isfinite(longitudes) & np.isfinite(values) & (np.abs(values) < 1.0e30)
+                delta_lon = (longitudes - longitude + 180.0) % 360.0 - 180.0
+                distance = (latitudes - latitude) ** 2 + (delta_lon * np.cos(np.deg2rad(latitude))) ** 2
+                distance[~valid] = np.inf
+                index = int(np.argmin(distance))
+                if distance[index] < best[0]:
+                    best = (float(distance[index]), float(latitudes[index]), float(longitudes[index]), float(values[index]))
+            if best[1] is None:
+                return {"layer": layer, "variable": variable, "label": label, "units": "W/m²", "value": None, "latitude": latitude, "longitude": longitude, "masked": True}
+            return {"layer": layer, "variable": variable, "label": label, "units": "W/m²",
+                    "value": round(best[3], 4), "latitude": best[1], "longitude": best[2], "masked": False}
+        fields = MONTHLY_RADIATION_FIELDS if cadence == "monthly" else RADIATION_FIELDS
+        field, label, units, _, _ = fields[variable]
+        if sources and grid_sources and cadence == "weekly":
+            samples = []
+            for path in sources:
+                with Dataset(path) as dataset:
+                    lat_axis = np.asarray(dataset.variables["latitude"][:])
+                    lon_axis = np.asarray(dataset.variables["longitude"][:])
+                    lat_i, lon_i = nearest_axis(lat_axis, latitude), nearest_axis(lon_axis, longitude, True)
+                    daily = masked_float(dataset.variables[field][:, lat_i, lon_i])
+                    finite = daily[np.isfinite(daily)]
+                    if finite.size:
+                        samples.append(float(finite.mean()))
+            if not samples:
+                value = np.ma.masked
+                cell_lat, cell_lon = latitude, longitude
+            else:
+                value = float(np.mean(samples))
+                cell_lat, cell_lon = float(lat_axis[lat_i]), float(lon_axis[lon_i])
+            if np.ma.is_masked(value):
+                return {"layer": layer, "variable": variable, "label": label, "units": units, "value": None,
+                        "latitude": cell_lat, "longitude": cell_lon, "masked": True, "gridResolution": "1 degree"}
+            return {"layer": layer, "variable": variable, "label": label, "units": units,
+                    "value": round(float(value), 4), "latitude": cell_lat, "longitude": cell_lon,
+                    "masked": False, "gridResolution": "1 degree", "sampleMethod": "weekly mean of daily means"}
+        if sources and grid_sources:
+            source = sources[0]
+        with Dataset(source) as dataset:
+            lat_axis = np.asarray(dataset.variables["latitude"][:])
+            lon_axis = np.asarray(dataset.variables["longitude"][:])
+            lat_i, lon_i = nearest_axis(lat_axis, latitude), nearest_axis(lon_axis, longitude, True)
+            data = dataset.variables[field]
+            value = data[lat_i, lon_i] if cadence == "monthly" else data[hour, lat_i, lon_i]
+        cell_lat, cell_lon = float(lat_axis[lat_i]), float(lon_axis[lon_i])
+    elif layer == "water":
+        field, label, units, _, _ = WATER_FIELDS[variable]
+        suffix = "" if pass_name == "am" else "_pm"
+        group_name = f"Soil_Moisture_Retrieval_Data_{pass_name.upper()}"
+        with Dataset(source) as dataset:
+            group = dataset.groups[group_name]
+            lat_grid = masked_float(group.variables[f"latitude{suffix}"])
+            lon_grid = masked_float(group.variables[f"longitude{suffix}"])
+            valid = np.isfinite(lat_grid) & np.isfinite(lon_grid)
+            lon_delta = (lon_grid - longitude + 180.0) % 360.0 - 180.0
+            distance = (lat_grid - latitude) ** 2 + (lon_delta * np.cos(np.deg2rad(latitude))) ** 2
+            distance[~valid] = np.inf
+            row, col = np.unravel_index(int(np.argmin(distance)), distance.shape)
+            field_name = field + suffix
+            value = group.variables[field_name][row, col]
+            cell_lat, cell_lon = float(lat_grid[row, col]), float(lon_grid[row, col])
+    elif layer == "soil":
+        field, label, units, _, _ = SOIL_FIELDS[variable]
+        with Dataset(source) as dataset:
+            lat_axis = np.asarray(dataset.variables["Latitude"][:])
+            lon_axis = np.asarray(dataset.variables["Longitude"][:])
+            lat_i, lon_i = nearest_axis(lat_axis, latitude), nearest_axis(lon_axis, longitude, True)
+            value = dataset.variables[field][lon_i, lat_i]
+        if field == "ts":
+            value = value - 273.15
+        cell_lat, cell_lon = float(lat_axis[lat_i]), float(lon_axis[lon_i])
+    else:
+        field, label, units = ATMOSPHERE_FIELDS[variable]
+        with Dataset(source) as dataset:
+            lat_axis = np.asarray(dataset.variables["lat"][:])
+            lon_axis = np.asarray(dataset.variables["lon"][:])
+            lat_i, lon_i = nearest_axis(lat_axis, latitude), nearest_axis(lon_axis, longitude, True)
+            value = dataset.variables[field][0, lat_i, lon_i]
+        cell_lat, cell_lon = float(lat_axis[lat_i]), float(lon_axis[lon_i])
+    value = np.ma.asarray(value)
+    if np.ma.is_masked(value) or not np.isfinite(float(value)):
+        return {"layer": layer, "variable": variable, "label": label, "units": units,
+                "value": None, "latitude": cell_lat, "longitude": cell_lon, "masked": True}
+    return {"layer": layer, "variable": variable, "label": label, "units": units,
+            "value": round(float(value), 4), "latitude": cell_lat, "longitude": cell_lon,
+            "masked": False, "gridResolution": "1 degree" if layer == "radiation" else None,
+            "sampleMethod": "nearest source grid cell" if layer == "radiation" else "nearest source observation"}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--layer", required=True, choices=("radiation", "water", "soil", "atmosphere", "aerosol"))
+    parser.add_argument("--source", required=True, type=Path)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--hour", type=int, default=0)
+    parser.add_argument("--cadence", choices=("hourly", "weekly", "monthly"), default="hourly")
+    parser.add_argument("--pass", dest="pass_name", choices=("am", "pm"), default="am")
+    parser.add_argument("--variable", required=True)
+    parser.add_argument("--sample-lat", type=float)
+    parser.add_argument("--sample-lon", type=float)
+    parser.add_argument("--sources-json")
+    parser.add_argument("--grid-sources-json")
+    args = parser.parse_args()
+    if args.layer == 'soil' and args.variable.startswith('cygnss-'):
+        if args.variable not in ['cygnss-9km','cygnss-36km','cygnss-sigma-9km','cygnss-sigma-36km']:
+            raise SystemExit('Invalid CYGNSS variable')
+        print(json.dumps(cygnss_result(args.source,args.variable,args.output,args.sample_lat,args.sample_lon),allow_nan=False))
+        return
+
+
+    if args.layer == 'aerosol':
+        if args.variable not in AEROSOL_FIELDS:
+            raise SystemExit('Invalid aerosol variable.')
+        if args.sample_lat is not None or args.sample_lon is not None:
+            if args.sample_lat is None or args.sample_lon is None or not -90 <= args.sample_lat <= 90 or not -180 <= args.sample_lon <= 180:
+                raise SystemExit('Provide valid sample coordinates.')
+        elif args.output is None:
+            raise SystemExit('--output is required when rendering a texture.')
+        print(json.dumps(aerosol_result(args), allow_nan=False))
+        return
+
+    if args.sample_lat is not None or args.sample_lon is not None:
+        if args.sample_lat is None or args.sample_lon is None or not -90 <= args.sample_lat <= 90 or not -180 <= args.sample_lon <= 180:
+            raise SystemExit("Sampling requires valid --sample-lat and --sample-lon coordinates.")
+        grid_sources = [Path(item) for item in json.loads(args.grid_sources_json)] if args.grid_sources_json else None
+        sources = [Path(item) for item in json.loads(args.sources_json)] if args.sources_json else grid_sources
+        print(json.dumps(sample_environment(args.source, args.layer, args.variable,
+                                            args.sample_lat, args.sample_lon, args.hour,
+                                            args.cadence, args.pass_name, sources, bool(grid_sources))))
+        return
+    if args.output is None:
+        raise SystemExit("--output is required when rendering a texture.")
+
+    if args.layer == "radiation":
+        if args.grid_sources_json:
+            result = render_radiation_grids([Path(item) for item in json.loads(args.grid_sources_json)],
+                                            args.hour, args.variable, args.cadence, args.output)
+            print(json.dumps(result))
+            return
+        if args.sources_json:
+            fields = SWATH_RADIATION_FIELDS
+            if args.variable not in fields:
+                raise SystemExit("Invalid CERES footprint radiation variable.")
+            result = render_swath_radiation([Path(item) for item in json.loads(args.sources_json)], args.variable, args.output)
+            print(json.dumps(result))
+            return
+        fields = MONTHLY_RADIATION_FIELDS if args.cadence == "monthly" else RADIATION_FIELDS
+        if args.variable not in fields or (args.cadence == "hourly" and not 0 <= args.hour <= 23):
+            raise SystemExit("Invalid radiation variable or hour.")
+        result = render_radiation(args.source, args.hour, args.variable, args.cadence, args.output)
+    elif args.layer == "water":
+        if args.variable not in WATER_FIELDS:
+            raise SystemExit("Invalid water variable.")
+        result = render_water(args.source, args.pass_name, args.variable, args.output)
+    elif args.layer == "soil":
+        if args.variable not in SOIL_FIELDS:
+            raise SystemExit("Invalid soil variable.")
+        result = render_soil(args.source, args.variable, args.output)
+    else:
+        if args.variable not in ATMOSPHERE_FIELDS:
+            raise SystemExit("Invalid atmosphere variable.")
+        result = render_atmosphere(args.source, args.variable, args.output)
+    print(json.dumps(result))
+
+
+if __name__ == "__main__":
+    main()
+
+#!/usr/bin/env python3
+"""Convert MOD21C2 HDF-EOS composites into globe-ready transparent PNGs.
+
+Requires a GDAL build with HDF4/HDF-EOS support, NumPy, and Pillow.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+from datetime import date, timedelta
+from pathlib import Path
+
+# Keep GDAL's bundled HDF4 driver discoverable in the project's Windows
+# environment. Without this, MOD21C2 files appear to have no readable bands.
+_gdal_bin = Path(sys.prefix) / "Library" / "bin"
+_gdal_plugins = Path(sys.prefix) / "Library" / "lib" / "gdalplugins"
+_gdal_dll_directory = os.add_dll_directory(str(_gdal_bin)) if os.name == "nt" and _gdal_bin.is_dir() else None
+if _gdal_bin.is_dir():
+    os.environ["PATH"] = str(_gdal_bin) + os.pathsep + os.environ.get("PATH", "")
+if _gdal_plugins.is_dir():
+    os.environ.setdefault("GDAL_DRIVER_PATH", str(_gdal_plugins))
+
+import numpy as np
+from osgeo import gdal
+from PIL import Image
+
+
+FILENAME = re.compile(r"^MOD21C2\.A(?P<year>\d{4})(?P<doy>\d{3})\.061\..+\.hdf$", re.I)
+WIDTH = 7200
+HEIGHT = 3600
+TEMP_MIN_C = -40.0
+TEMP_MAX_C = 60.0
+PALETTE = np.array([
+    [33, 102, 172],
+    [103, 169, 207],
+    [247, 247, 247],
+    [239, 138, 98],
+    [178, 24, 43],
+], dtype=np.float32)
+
+
+def field_dataset(container: gdal.Dataset, field: str) -> gdal.Dataset:
+    for subdataset, description in container.GetSubDatasets():
+        if (subdataset.rsplit(":", 1)[-1].casefold() == field.casefold()
+                or field.casefold() in description.casefold()):
+            result = gdal.Open(subdataset, gdal.GA_ReadOnly)
+            if result is not None:
+                return result
+    raise RuntimeError(f"Could not find {field} in {container.GetDescription()}")
+
+
+def colorize(path: Path, view: str, output: Path) -> None:
+    gdal.UseExceptions()
+    container = gdal.OpenEx(str(path), gdal.OF_RASTER, open_options=["LIST_SDS=YES"])
+    if container is None:
+        raise RuntimeError(f"GDAL could not open {path}")
+
+    lst = field_dataset(container, f"LST_{view.title()}")
+    qc = field_dataset(container, f"QC_{view.title()}")
+    if (lst.RasterXSize, lst.RasterYSize) != (WIDTH, HEIGHT):
+        raise RuntimeError(f"Unexpected grid size in {path.name}: {lst.RasterXSize}x{lst.RasterYSize}")
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    image = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
+    lst_band, qc_band = lst.GetRasterBand(1), qc.GetRasterBand(1)
+    chunk_rows = 128
+    for y in range(0, HEIGHT, chunk_rows):
+        rows = min(chunk_rows, HEIGHT - y)
+        raw = lst_band.ReadAsArray(0, y, WIDTH, rows).astype(np.float32)
+        quality = qc_band.ReadAsArray(0, y, WIDTH, rows).astype(np.uint8)
+        # MODLAND QA == 0, input data quality == 0, and LST accuracy better than 2 K.
+        good = (raw != 0) & ((quality & 0b11) == 0) & (((quality >> 2) & 0b11) == 0) & (((quality >> 6) & 0b11) >= 2)
+        celsius = raw * 0.02 - 273.15
+        position = np.clip((celsius - TEMP_MIN_C) / (TEMP_MAX_C - TEMP_MIN_C), 0.0, 1.0) * (len(PALETTE) - 1)
+        lower = np.floor(position).astype(np.int8)
+        upper = np.minimum(lower + 1, len(PALETTE) - 1)
+        fraction = (position - lower)[..., None]
+        rgb = PALETTE[lower] * (1.0 - fraction) + PALETTE[upper] * fraction
+        rgba = np.empty((rows, WIDTH, 4), dtype=np.uint8)
+        rgba[..., :3] = np.clip(rgb, 0, 255).astype(np.uint8)
+        rgba[..., 3] = np.where(good, 205, 0).astype(np.uint8)
+        # SphereGeometry puts longitude -90 degrees at texture u=0; rotate the global grid to match.
+        rgba = np.roll(rgba, -WIDTH // 4, axis=1)
+        image.paste(Image.fromarray(rgba, "RGBA"), (0, y))
+    image.save(output, format="PNG", optimize=True)
+
+
+def sample_value(path: Path, view: str, latitude: float, longitude: float) -> dict:
+    gdal.UseExceptions()
+    container = gdal.OpenEx(str(path), gdal.OF_RASTER, open_options=["LIST_SDS=YES"])
+    if container is None:
+        raise RuntimeError(f"GDAL could not open {path}")
+    lst = field_dataset(container, f"LST_{view.title()}")
+    qc = field_dataset(container, f"QC_{view.title()}")
+    x = min(WIDTH - 1, max(0, int(((longitude + 180.0) % 360.0) / 360.0 * WIDTH)))
+    y = min(HEIGHT - 1, max(0, int((90.0 - latitude) / 180.0 * HEIGHT)))
+    raw = int(lst.GetRasterBand(1).ReadAsArray(x, y, 1, 1)[0, 0])
+    quality = int(qc.GetRasterBand(1).ReadAsArray(x, y, 1, 1)[0, 0])
+    good = raw != 0 and (quality & 0b11) == 0 and ((quality >> 2) & 0b11) == 0 and ((quality >> 6) & 0b11) >= 2
+    return {"layer": "temperature", "period": period_metadata(path)["key"],
+            "view": view, "label": f"Land surface temperature · {view}", "units": "°C",
+            "value": round(raw * 0.02 - 273.15, 3) if good else None,
+            "latitude": 90.0 - (y + 0.5) * 180.0 / HEIGHT,
+            "longitude": -180.0 + (x + 0.5) * 360.0 / WIDTH, "masked": not good, "source": path.name, "gridResolution": "0.05 degrees",
+            "observationStart": period_metadata(path)["start"], "observationEnd": period_metadata(path)["end"],
+            "measurementType": "8-day average land-surface temperature", "qualityCode": quality,
+            "missingReason": "No value passing the selected quality filter" if not good else None}
+
+
+def period_metadata(path: Path) -> dict[str, str]:
+    match = FILENAME.match(path.name)
+    if not match:
+        raise ValueError(f"Unexpected MOD21C2 filename: {path.name}")
+    year, doy = int(match.group("year")), int(match.group("doy"))
+    start = date(year, 1, 1) + timedelta(days=doy - 1)
+    end = start + timedelta(days=7)
+    return {
+        "key": f"{year:04d}{doy:03d}",
+        "start": start.isoformat(),
+        "end": end.isoformat(),
+        "label": f"{start.strftime('%b')} {start.day}–{end.strftime('%b')} {end.day}, {end.year}",
+        "source": path.name,
+    }
+
+
+def write_manifest(output_root: Path, files: list[Path]) -> None:
+    periods = []
+    for source in files:
+        metadata = period_metadata(source)
+        key = metadata["key"]
+        texture_dir = output_root / "textures"
+        metadata["day"] = (texture_dir / f"{key}_day.png").is_file()
+        metadata["night"] = (texture_dir / f"{key}_night.png").is_file()
+        if metadata["day"] or metadata["night"]:
+            periods.append(metadata)
+    periods.sort(key=lambda item: item["key"])
+    manifest = {
+        "source": "MODIS/Terra MOD21C2.061",
+        "units": "degC",
+        "grid": {"width": WIDTH, "height": HEIGHT, "resolutionDegrees": 0.05},
+        "colorRangeC": {"min": TEMP_MIN_C, "max": TEMP_MAX_C},
+        "periods": periods,
+    }
+    manifest_path = output_root / "manifest.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = manifest_path.with_suffix(".json.tmp")
+    temp_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    temp_path.replace(manifest_path)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input-dir", type=Path, help="Folder containing MOD21C2 Collection 061 HDF files")
+    parser.add_argument("--source", type=Path, help="Render one source HDF on demand")
+    parser.add_argument("--view", choices=("day", "night"), help="Observation view for --source")
+    parser.add_argument("--output", type=Path, help="Output PNG for --source")
+    parser.add_argument("--sample-lat", type=float)
+    parser.add_argument("--sample-lon", type=float)
+    parser.add_argument("--output-dir", type=Path, default=Path("data/temperature"), help="Output folder served by the Node API")
+    parser.add_argument("--views", nargs="+", choices=("day", "night"), default=("day", "night"))
+    parser.add_argument("--limit", type=int, help="Process only the first N files, useful for a small initial ingest")
+    parser.add_argument("--overwrite", action="store_true", help="Regenerate textures that already exist")
+    args = parser.parse_args()
+
+    if args.sample_lat is not None or args.sample_lon is not None:
+        if not args.source or not args.view or args.sample_lat is None or args.sample_lon is None:
+            parser.error("sampling requires --source, --view, --sample-lat, and --sample-lon")
+        if not -90 <= args.sample_lat <= 90 or not -180 <= args.sample_lon <= 180:
+            parser.error("sample coordinates must be latitude -90..90 and longitude -180..180")
+        print(json.dumps(sample_value(args.source, args.view, args.sample_lat, args.sample_lon)))
+        return
+    if args.source:
+        if not args.view or not args.output:
+            parser.error("--source requires both --view and --output")
+        colorize(args.source, args.view, args.output)
+        print(f"Prepared {args.view} temperature texture for {args.source.name}")
+        return
+    if not args.input_dir:
+        parser.error("--input-dir is required unless --source is provided")
+
+    all_files = sorted(path for path in args.input_dir.glob("MOD21C2.A*.061.*.hdf") if FILENAME.match(path.name))
+    if not all_files:
+        raise SystemExit(f"No MOD21C2 Collection 061 files found in {args.input_dir}")
+    files = all_files[:args.limit] if args.limit else all_files
+
+    texture_dir = args.output_dir / "textures"
+    for index, source in enumerate(files, start=1):
+        key = period_metadata(source)["key"]
+        for view in args.views:
+            target = texture_dir / f"{key}_{view}.png"
+            if target.exists() and not args.overwrite:
+                continue
+            print(f"[{index}/{len(files)}] {source.name} ({view})", flush=True)
+            colorize(source, view, target)
+        write_manifest(args.output_dir, all_files)
+
+    write_manifest(args.output_dir, all_files)
+    print(f"Prepared {len(files)} composite(s) in {args.output_dir}")
+
+
+if __name__ == "__main__":
+    main()
