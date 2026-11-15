@@ -1,1 +1,0 @@
-{"layer":"aerosol","variable":"aod550","label":"QA-filtered aerosol optical thickness at 550 nm","units":"1","coverage":"single satellite swath; not global coverage","quality":"product Best_Estimate QA-filtered field","validCells":73,"min":0.009,"max":0.169,"displayMin":0,"displayMax":2}

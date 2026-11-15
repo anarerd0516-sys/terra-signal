@@ -1,2 +1,0 @@
-{"layer":"atmosphere","date":"202605","variable":"r90p","field":"R90P","label":"Heavy-rain precipitation · 90th percentile","units":"mm/day","scale":"2nd–98th percentile","validCells":121701,"min":1.172,"max":424.112,"displayMin":3.66717267036438,"displayMax":77.34805297851562}
-{"layer":"atmosphere","date":"202601","variable":"rx1day","field":"RX1Day","label":"Maximum one-day precipitation","units":"mm/day","scale":"2nd–98th percentile","validCells":207936,"min":0,"max":760.696,"displayMin":0.1263039484620094,"displayMax":96.80502319335929}
